@@ -1,0 +1,98 @@
+# ===== Python =====
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ===== Java =====
+target/
+*.jar
+*.war
+*.class
+*.log
+hs_err_pid*.log
+java_error_in*.hprof
+*.iml
+
+# ===== IDE & Editor =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+.factorypath/
+.metadata/
+.recommenders/
+.sts4-cache/
+
+# ===== Environment & Secrets =====
+.env
+.env.local
+.env.*.local
+*.env
+!/.env.example
+application-local.properties
+application-local.yml
+secrets/
+*.pem
+*.key
+*.secret
+credentials/
+aws-credentials.properties
+service-account.json
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+._*
+.Spotlight-V100
+.Trashes
+
+# ===== Docker =====
+docker-compose.override.yml
+docker-compose.dev.yml
+
+# ===== Test & Coverage =====
+test-results/
+coverage/
+jacoco/
+surefire-reports/
+failsafe-reports/
+
+# ===== Build & Generated =====
+node_modules/
+.gradle/
+build/
+out/
+generated/
+
+# ===== AI Team & LLM =====
+.ai-team/state/collaboration.json
+.ai-team/tasks/*.done
+.ai-team/metrics/*.json
+.ai-team/github/*.json
+*.md.bak
+
+# ===== Temporary Files =====
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
