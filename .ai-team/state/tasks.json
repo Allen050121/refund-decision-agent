@@ -1,11 +1,30 @@
-{
-  "version": 1,
-  "tasks": [],
-  "updatedAt": null,
-  "notes": [
-    "This file is tool-readable task state.",
-    "Markdown task cards remain the human-readable source of task details.",
-    "Run .ai-team/scripts/Sync-AiTeamState.ps1 after creating or updating task cards.",
-    "Keep execution evidence in .ai-team/state/runs.json instead of chat history."
-  ]
+﻿{
+    "version":  1,
+    "updatedAt":  "2026-06-23T16:07:19.0733584+08:00",
+    "tasks":  [
+                  {
+                      "task_id":  "TASK-001",
+                      "title":  "阶段1: Java确定性业务底座 - 领域模型与退款资格校验",
+                      "status":  "pending",
+                      "task_type":  "implementation",
+                      "delivery_stage":  "stack",
+                      "mode":  "standard",
+                      "work_mode":  "sequential",
+                      "workflow_mode":  "standard",
+                      "branch":  "",
+                      "github_issue":  "",
+                      "github_pr":  "",
+                      "ci_status":  "",
+                      "dependencies":  [
+
+                                       ],
+                      "last_run_id":  "",
+                      "last_result":  "",
+                      "blocked_reason":  "",
+                      "verification_status":  "not_run",
+                      "updated_at":  "2026-06-23T16:07:19.0708480+08:00",
+                      "business":  "实现 Java 确定性业务底座，包含领域模型和退款资格校验服务，使退款决策能由确定性业务规则计算而非依赖模型判断。",
+                      "task_card":  ".ai-team/tasks/TASK-001-java-domain-model.md"
+                  }
+              ]
 }
