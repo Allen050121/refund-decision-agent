@@ -17,8 +17,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/health").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                // 退款查询 API（内部服务调用）
+                .requestMatchers("/api/orders/**").permitAll()
+                .requestMatchers("/api/learning/**").permitAll()
+                .requestMatchers("/api/courses/**").permitAll()
+                .requestMatchers("/api/refund/**").permitAll()
                 .anyRequest().authenticated()
             );
 
