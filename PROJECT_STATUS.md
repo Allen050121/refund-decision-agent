@@ -1,118 +1,145 @@
-# 项目初始化完成总结
+# 售后退款决策 Agent - 项目状态跟踪
 
-## 已完成工作
+> 最后更新：2026-06-23
 
-### ✅ 阶段 0：问题与评测先行（部分完成）
+## 当前阶段
 
-#### 1. 项目结构搭建
-- [x] 创建 Java 服务目录结构
-- [x] 创建 Python Agent 目录结构
-- [x] 创建 Docker 配置目录
-- [x] 创建测试目录
+**阶段 0：问题与评测先行** → 已完成基础框架，准备进入 **阶段 1：Java 确定性业务底座**
 
-#### 2. 基础配置
-- [x] Docker Compose 配置（MySQL + Redis + Elasticsearch）
-- [x] Java Spring Boot pom.xml
-- [x] Python requirements.txt
-- [x] 数据库 Schema 设计
-- [x] 种子数据初始化脚本
+---
 
-#### 3. 核心框架
-- [x] Java Spring Boot 应用启动类
-- [x] Java Security 基础配置
-- [x] Java Health Check 控制器
-- [x] Python FastAPI 应用框架
-- [x] Python 配置管理模块
-- [x] Python API 路由骨架
+## 阶段进度
 
-#### 4. 测试数据集
-- [x] 创建 30 条种子测试样本（覆盖 6 类场景）
-  - 8 条正常可退款/不可退款案例
-  - 2 条信息缺失案例
-  - 3 条权限和攻击案例
-  - 2 条工具失败案例
-  - 2 条规则冲突案例
+### ✅ 阶段 0：问题与评测先行（框架搭建完成）
 
-#### 5. 文档
-- [x] README.md 项目说明
-- [x] DEVELOPMENT.md 开发文档
-- [x] 产品与开发文档（已有）
+| 交付物 | 状态 | 备注 |
+|--------|------|------|
+| 6 类退款规则 | ⚠️ 待定义 | 需在开发文档中明确 |
+| 30 条最小种子测试集 | ✅ 已创建 | tests/seed-dataset.md |
+| 指标定义 | ⚠️ 待完善 | 参考文档第9节 |
+| 业务决策表 | ❌ 待创建 | 需定义标准答案 |
+| API 契约草案 | ⚠️ 部分完成 | 有骨架，需完善 |
+| 数据库 Schema | ✅ 已完成 | java-service/src/main/resources/sql/ |
 
-## 待完成工作
+**退出条件检查：**
+- ❌ 不调用模型也能根据标准答案判断测试是否通过（需完成业务决策表）
 
-### 🔄 阶段 1：Java 确定性业务底座
+---
 
-需要实现：
-- [ ] 用户、订单、课程领域模型
-- [ ] 工单与 AgentTask 领域模型
-- [ ] 退款资格领域服务
-- [ ] 订单归属和权限校验
-- [ ] Flyway 迁移脚本完善
-- [ ] 单元测试和集成测试
+### 🔄 阶段 1：Java 确定性业务底座（下一步）
 
-### 🔄 阶段 2：Python Agent 最小链路
+| 实现内容 | 状态 | 优先级 |
+|----------|------|--------|
+| 用户、订单、课程领域模型 | ❌ 待实现 | P0 |
+| 学习进度实体 | ❌ 待实现 | P0 |
+| 工单与 AgentTask 领域模型 | ❌ 待实现 | P0 |
+| 退款资格领域服务 | ❌ 待实现 | P0 |
+| 订单归属和权限校验 | ❌ 待实现 | P0 |
+| Flyway 数据脚本 | ✅ 已创建 | - |
+| 单元测试 | ❌ 待编写 | P1 |
+| Testcontainers 集成测试 | ❌ 待编写 | P1 |
 
-需要实现：
-- [ ] LangGraph 状态图定义
-- [ ] 工单结构化节点
-- [ ] Java API Adapter
-- [ ] 结构化结果校验
-- [ ] 端到端测试
+**退出条件：**
+- 退款资格规则测试全部通过
+- 重复请求不会产生重复业务结果
 
-### 🔄 阶段 3：RAG 与证据
+---
 
-需要实现：
-- [ ] 规则入库与版本元数据
-- [ ] BM25 检索基线
-- [ ] 引用校验机制
-- [ ] 冲突检测与转人工
+## 环境配置状态
 
-### 🔄 阶段 4：Redis Streams 与持久执行
+| 组件 | 地址 | 状态 |
+|------|------|------|
+| Java Service | localhost:8080 | ✅ 可启动 |
+| Python Agent | localhost:8000 | ✅ 依赖已安装 |
+| MySQL | 192.168.85.66:3306 | ⚠️ 需创建数据库 |
+| Redis | 192.168.85.66:6379 | ✅ 虚拟机运行 |
+| Elasticsearch | 192.168.85.66:9200 | ✅ 虚拟机运行 |
 
-需要实现：
-- [ ] Outbox 模式
-- [ ] Consumer Group
-- [ ] ACK/Pending/Claim 机制
-- [ ] Checkpointer 和人工审批
-- [ ] SSE 进度事件
+---
 
-### 🔄 阶段 5：评测、成本和安全
+## 技术栈确认
 
-需要实现：
-- [ ] 扩充到 120 条测试集
-- [ ] 模型/Prompt 回归测试
-- [ ] Token 成本追踪
-- [ ] Prompt Injection 测试
-- [ ] 失败原因分类
+| 技术 | 版本 | 状态 |
+|------|------|------|
+| Java | 21 | ✅ 已安装 |
+| Spring Boot | 3.2.0 | ✅ pom.xml 配置 |
+| Maven | 3.9.9 | ✅ 已安装 |
+| Python | 3.12 | ✅ Miniconda 环境 |
+| FastAPI | 最新 | ✅ 已安装 |
+| LangGraph | 最新 | ✅ 已安装 |
 
-### 🔄 阶段 6：展示与简历证据
+---
 
-需要交付：
-- [ ] 架构图和状态图
-- [ ] OpenAPI 文档
-- [ ] 评测报告
-- [ ] 故障恢复演示
-- [ ] 演示视频
-- [ ] 简历项目描述
+## 下一步任务卡
 
-## 项目当前状态
+### 任务 #1：创建数据库和执行 SQL
 
-**状态**: 阶段 0 基础结构已搭建完成，可以开始阶段 1 的业务逻辑开发。
+**描述：** 在虚拟机 MySQL 中创建 refund_agent 数据库和表结构
 
-**项目根目录**: `D:\yangjw\workspace\refund-decision-agent`
+**步骤：**
+1. 连接虚拟机 MySQL (192.168.85.66:3306)
+2. 执行 `01-create-database.sql`
+3. 执行 `02-create-tables.sql`
+4. 执行 `03-seed-data.sql`（可选，测试数据）
 
-## 下一步建议
+**验证：** 能查询到 users、orders、courses 等表
 
-按照开发阶段文档的建议，接下来应该：
+---
 
-1. **完善 Java 业务底座**（阶段 1）
-   - 实现用户、订单、课程领域模型
-   - 实现退款资格校验服务
-   - 编写核心业务规则的单元测试
+### 任务 #2：实现 Java 领域模型（阶段 1 核心）
 
-2. **同时准备评测集**（阶段 0 收尾）
-   - 将 Markdown 测试集转换为可执行的 JSON 格式
-   - 定义业务决策表
-   - 完善指标定义
+**描述：** 按文档 4.3 代码结构实现领域模型
 
-您希望我先继续哪个部分？
+**目录结构：**
+```
+com.example.aftersale
+├── domain
+│   ├── support/        # 工单领域
+│   ├── refund/         # 退款领域
+│   ├── agenttask/      # Agent任务领域
+│   └── shared/         # 共享值对象
+```
+
+**值对象（按文档要求）：**
+- `OrderId`
+- `UserId`
+- `Money`（使用整数分，禁止浮点数）
+- `RuleVersion`
+- `TokenUsage`
+
+**优先级：** P0 - 必须完成才能进入阶段 2
+
+---
+
+### 任务 #3：定义业务决策表（阶段 0 收尾）
+
+**描述：** 为 30 条测试样本定义标准答案，满足阶段 0 退出条件
+
+**输出格式：**
+```json
+{
+  "testId": "Test-001",
+  "expectedDecision": "REFUND_RECOMMENDED",
+  "expectedAmount": 19900,
+  "expectedRuleId": "REFUND-2026-003",
+  "expectedEvidence": ["ORDER_PAID", "COURSE_UNAVAILABLE"]
+}
+```
+
+---
+
+## Git 提交记录
+
+| 时间 | Commit | 描述 |
+|------|--------|------|
+| 2026-06-22 | 9b5a1e0 | Initial project setup |
+| 2026-06-22 | ecb1c2b | Add environment setup guide |
+| 2026-06-23 | 8b7c73a | Update configuration for VM |
+
+---
+
+## 备注
+
+- **开发文档位置：** `01-售后决策Agent-MVP产品与开发文档.md`
+- **GitHub 仓库：** https://github.com/Allen050121/refund-decision-agent
+- **AI Team Workflow：** `.ai-team/` 已初始化
