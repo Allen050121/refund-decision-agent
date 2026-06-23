@@ -8,17 +8,17 @@ class Settings(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
 
-    # Java API
+    # Java API (本地运行)
     JAVA_API_URL: str = "http://localhost:8080"
     JAVA_API_TOKEN: str = "internal-service-token"
 
-    # Redis
-    REDIS_URL: str = "redis://localhost:6379/0"
+    # Redis (Virtual Machine)
+    REDIS_URL: str = "redis://192.168.85.66:6379/0"
     REDIS_STREAM_NAME: str = "after-sale:agent:tasks"
     REDIS_EVENTS_KEY: str = "after-sale:agent:events:{task_id}"
 
-    # Elasticsearch
-    ELASTICSEARCH_URL: str = "http://localhost:9200"
+    # Elasticsearch (Virtual Machine)
+    ELASTICSEARCH_URL: str = "http://192.168.85.66:9200"
     ELASTICSEARCH_INDEX: str = "refund-rules"
 
     # LLM

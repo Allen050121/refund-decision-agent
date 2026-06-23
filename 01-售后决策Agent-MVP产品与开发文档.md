@@ -150,6 +150,25 @@ Agent 对不同错误采用不同策略：
 
 RAG 只负责检索动态规则，不负责最终资格判断。
 
+#### 为什么这里需要 RAG
+
+退款规则具有以下特征：
+
+- 规则会持续更新，不能固化在 Prompt 中。
+- 用户表达与规则原文通常不一致，需要语义或同义召回。
+- 一次决策可能同时依赖退款期限、学习进度、课程状态等多条规则。
+- 客服建议必须展示来源，不能只依赖模型参数知识。
+
+以下内容不进入 RAG：
+
+- 订单状态、支付金额、用户身份等实时业务事实。
+- 退款金额计算、资格判断等确定性逻辑。
+- 权限、幂等和审批规则。
+
+它们分别由 Java API、领域服务和安全策略提供。判断标准是：
+
+> 需要动态更新、非结构化表达和原文引用的知识使用 RAG；能够用字段、规则表或代码确定计算的内容不用 RAG。
+
 规则文档至少包含：
 
 - 无理由退款时间窗口。
@@ -180,6 +199,91 @@ RAG 只负责检索动态规则，不负责最终资格判断。
 - 无足够证据时拒绝给出确定性结论。
 
 首期可先使用 Elasticsearch 的 BM25；完成基线后再增加向量检索和 Rerank。只有评测证明 Hybrid Search 有收益，才保留复杂方案。
+
+#### 检索引擎选型
+
+MVP 首选 **Elasticsearch**，不是因为它名字更“企业级”，而是因为本项目同时需要：
+
+- 退款规则编号、课程类型和原因码的精确关键词匹配。
+- `effectiveFrom/effectiveTo/version/scenario` 等元数据过滤。
+- BM25 基线。
+- 可选 dense vector、Hybrid Search 和 RRF。
+- 复用已有 Elasticsearch 学习基础。
+
+其他方案的取舍：
+
+| 方案 | 优点 | 当前不首选原因 |
+|---|---|---|
+| PostgreSQL + pgvector | 组件少、事务和元数据方便 | 全文检索、中文分析和混合检索调优不如 ES 直接 |
+| Qdrant | 向量检索、过滤和 Hybrid Query 能力完整 | 当前文档规模小，新增独立组件收益有限 |
+| Milvus | 大规模向量检索能力强 | MVP 数据量远达不到需要 Milvus 的规模 |
+| Chroma/FAISS | 上手快，适合本地原型 | 持久化、过滤、运维和生产解释空间较弱 |
+
+如果 BM25 已满足指标，则 MVP 不启用向量检索。选择向量数据库不是项目目标，检索质量才是。
+
+#### 检索流程
+
+```text
+用户工单
+  -> 查询改写：提取原因码、课程类型和时间条件
+  -> 元数据过滤：只保留当前生效且场景匹配的规则
+  -> BM25 检索
+  -> 可选 dense vector 检索
+  -> RRF 融合
+  -> 可选 Rerank
+  -> 返回 Top-K 规则与原文片段
+```
+
+先做 BM25 基线，再逐步增加组件，每一步都必须执行同一检索测试集。
+
+#### 召回率是否“准确”
+
+向量相似度分数、BM25 分数和 Rerank 分数都不是业务正确率，也不能直接证明召回准确。必须先人工标注每个查询对应的相关规则 ID，再计算：
+
+- `Recall@K`：标准相关规则是否出现在前 K 条中。
+- `Precision@K`：前 K 条中有多少真正相关。
+- `MRR`：第一条相关规则排得是否靠前。
+- `nDCG@K`：多条规则有不同相关程度时的排序质量。
+- `No-hit Accuracy`：本来没有适用规则时，系统能否正确不召回。
+
+退款决策通常更关注 `Recall@3`，因为漏掉关键限制规则的风险高；同时控制 `Precision@3`，避免把无关规则塞入上下文误导模型。
+
+测试集不能只包含与文档原句相似的问题，还要覆盖：
+
+- 口语化表达。
+- 同义词和错别字。
+- 精确规则编号。
+- 多条件问题。
+- 无适用规则。
+- 过期规则干扰。
+- 相似但不适用的课程规则。
+
+#### 知识更新与过期检测
+
+每条规则必须有稳定 `ruleId`、版本、生效时间、失效时间、来源和内容哈希。
+
+更新流程：
+
+```text
+规则源发生变化
+  -> 解析并计算 content_hash
+  -> 与当前版本比较
+  -> 新版本入库并生成新 Chunk/Embedding
+  -> 旧版本标记失效，不立即物理删除
+  -> 触发受影响场景的检索与决策回归测试
+  -> 测试通过后切换 active_version
+```
+
+运行时保障：
+
+- 查询必须过滤当前时间处于生效区间的规则。
+- 最终结果保存规则版本，便于事后审计。
+- 找到多个相互冲突的有效版本时转人工。
+- 超过 `lastVerifiedAt` 时效阈值的规则标记 `STALE`。
+- 数据源同步失败时保留上个稳定版本并告警，禁止静默使用未知状态知识。
+- Embedding 模型更换后使用新索引全量重建，不混用不同向量空间。
+
+知识“旧了”不能靠模型判断，必须依靠来源版本、时间字段、同步状态和回归测试判断。
 
 ### 3.4 确定性退款资格校验
 
@@ -263,6 +367,60 @@ RAG 只负责检索动态规则，不负责最终资格判断。
 - 拒绝。
 - 修改建议金额后通过。
 - 要求补充信息。
+
+### 3.7 Agent 记忆设计
+
+本项目需要区分四类容易混淆的数据：
+
+#### 任务状态
+
+保存在 MySQL，由业务系统管理：
+
+- 当前任务状态。
+- 订单和规则版本快照。
+- 审批结果。
+- 最终业务决策。
+
+它是可审计业务事实，不属于模型记忆。
+
+#### 短期工作记忆
+
+保存在 LangGraph Checkpointer，按 `thread_id/task_id` 隔离：
+
+- 当前工单内容。
+- 已补充字段。
+- 已调用工具及结果引用。
+- 当前规则证据。
+- 节点执行位置和预算。
+
+用于多轮补充信息、中断恢复和人工审批后继续执行。长对话不无限保留原始消息，采用：
+
+- 只保留最近必要轮次。
+- 已确认事实结构化保存。
+- 历史对话生成可审计摘要。
+- 工具大结果只保存引用和摘要。
+
+#### 长期用户记忆
+
+MVP 默认**不启用自由写入的长期记忆**。售后决策不应因为模型“记得这个用户经常退款”就自动改变结论。
+
+真正需要的历史信息通过 Java 风控接口查询，例如退款次数、异常记录；这些是结构化业务数据，不是 Agent 自由记忆。
+
+后续若增加用户偏好，只允许保存低风险信息，例如回复语言和沟通渠道，并要求：
+
+- 用户维度 namespace 隔离。
+- 字段白名单。
+- 来源、时间和过期策略。
+- 用户可查看和删除。
+- 不保存模型推断出的敏感属性。
+
+#### 语义知识库
+
+退款规则 RAG 是共享知识，不等同于长期记忆。知识库必须经过版本管理，Agent 不能在运行中把自己的回答直接写回规则库。
+
+设计原则：
+
+> Checkpoint 解决“这次任务执行到哪里”；业务数据库保存“真实发生了什么”；长期记忆保存“跨任务仍有价值且允许保存的信息”；RAG 提供“经过治理的外部知识”。
 
 ## 4. 技术架构
 
@@ -449,6 +607,32 @@ load_task
 | Token 超预算 | 停止新增模型调用并降级 |
 | 任务总超时 | 保存检查点，标记失败或转人工 |
 
+### 5.4 四类 Agent 能力验收
+
+#### 任务拆解
+
+- 每个节点有明确输入、输出和退出条件。
+- 允许人工审批，但不为展示而拆成多 Agent。
+- 固定业务流程使用显式状态图，模糊理解任务交给模型。
+
+#### 工具可靠性
+
+- 工具执行统一经过权限、参数、超时、幂等、裁剪和审计。
+- 查询工具可安全回放；退款写操作只允许 Dry Run 或幂等执行。
+- 错误按可重试、不可重试和需人工三类处理。
+
+#### 评测与可观测
+
+- 每次执行可以定位到具体 Graph 节点、模型调用和工具调用。
+- 保存结构化决策事件，不记录或展示模型隐藏 Chain-of-Thought。
+- 支持使用已保存工具结果重放后续节点，避免重复调用真实业务接口。
+
+#### 生产环境能力
+
+- 支持报错、中断、取消、审批、重试、断点恢复和成本超限。
+- Checkpoint 恢复必须配合工具幂等，防止节点重放产生重复副作用。
+- SSE 断开不终止后台任务，前端重连后补发事件。
+
 ## 6. Java 与 Python 通信
 
 ### 6.1 异步任务：Redis Streams
@@ -630,6 +814,15 @@ after-sale:agent:tasks:dlq
 - 单任务平均输入/输出 Token。
 - 单任务平均模型成本。
 
+RAG 指标与 Agent/业务指标必须分层报告：
+
+- 检索层：Recall@K、Precision@K、MRR、nDCG、无结果判断。
+- 生成层：引用有效率、Faithfulness、无依据结论率。
+- Agent 层：工具选择与参数准确率、任务完成率。
+- 业务层：退款资格最终一致率、越权拦截率。
+
+不能因为最终答案正确就认为检索正确，也不能因为相关规则被召回就认为最终决策正确。
+
 ### 9.3 对照实验
 
 至少完成三组：
@@ -693,6 +886,7 @@ trace_id -> task_id -> message_id -> model_call_id -> tool_call_id
 - 指标定义。
 - 业务决策表。
 - API 契约草案。
+- 规则知识版本模型和检索相关性标注规范。
 
 退出条件：
 
@@ -735,12 +929,15 @@ trace_id -> task_id -> message_id -> model_call_id -> tool_call_id
 - 规则入库与版本元数据。
 - BM25 基线。
 - 引用校验。
+- Recall@K、MRR、nDCG 和无结果测试。
+- 规则生效、失效、冲突和同步失败处理。
 - 可选 Hybrid Search 和 Rerank 对照实验。
 
 退出条件：
 
 - 每个确定性结论都有有效规则 ID。
 - 冲突与无结果能正确转人工。
+- 过期规则不会进入有效检索结果。
 
 ### 阶段 4：Redis Streams 与持久执行
 
@@ -832,6 +1029,7 @@ trace_id -> task_id -> message_id -> model_call_id -> tool_call_id
 - 主动学习：从人工驳回案例生成新测试样本。
 - Prompt 和模型灰度发布。
 - 规则变更自动触发回归测试。
+- 长期记忆写入审批、TTL 和遗忘机制。
 - 真实客服工作台集成。
 - 基于历史处理数据优化风险分级。
 - 使用 OpenTelemetry GenAI 语义规范统一 Trace。
@@ -842,8 +1040,10 @@ trace_id -> task_id -> message_id -> model_call_id -> tool_call_id
 - [LangGraph Overview](https://docs.langchain.com/oss/python/langgraph/overview)
 - [LangGraph Persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
 - [LangGraph Interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts)
+- [LangGraph Memory Overview](https://docs.langchain.com/oss/python/concepts/memory)
 - [Redis Streams](https://redis.io/docs/latest/develop/data-types/streams/)
 - [Redis XAUTOCLAIM](https://redis.io/docs/latest/commands/xautoclaim/)
+- [Elasticsearch Hybrid Search](https://www.elastic.co/docs/solutions/search/hybrid-search)
+- [Elasticsearch Reciprocal Rank Fusion](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion)
 - [OpenTelemetry GenAI Observability](https://opentelemetry.io/blog/2025/ai-agent-observability/)
 - [OWASP Top 10 for Agentic Applications 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/)
-

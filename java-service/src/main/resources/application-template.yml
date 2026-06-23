@@ -1,0 +1,40 @@
+# Application Configuration Template
+# Copy this file to application-local.yml and update values
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    # Virtual Machine: 192.168.85.66
+    url: jdbc:mysql://192.168.85.66:3306/refund_agent?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: ${DB_PASSWORD}  # Set environment variable or update here
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: false
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  data:
+    redis:
+      host: 192.168.85.66
+      port: 6379
+
+jwt:
+  secret: ${JWT_SECRET}  # Set environment variable for production
+  expiration: 86400000
+
+logging:
+  level:
+    com.example.aftersale: DEBUG
+    org.springframework.security: WARN

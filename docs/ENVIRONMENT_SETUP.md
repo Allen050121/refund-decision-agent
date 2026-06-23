@@ -1,196 +1,177 @@
 # 环境配置指南
 
+## 当前环境配置
+
+- **虚拟机 IP**: 192.168.85.66
+- **MySQL**: 192.168.85.66:3306
+- **Redis**: 192.168.85.66:6379
+- **Elasticsearch**: 192.168.85.66:9200
+
 ## 前置要求
 
 ### 必需软件
-- **Java 21+** - [Download](https://www.oracle.com/java/technologies/downloads/)
-- **Python 3.12+** - [Download](https://www.python.org/downloads/)
+- **Java 21+** - [Download](https://adoptium.net/) (推荐 Temurin)
 - **Maven 3.9+** - [Download](https://maven.apache.org/download.cgi)
-- **Docker & Docker Compose** - [Download](https://www.docker.com/products/docker-desktop/)
+- **Python 3.12+** (Miniconda) - [Download](https://docs.conda.io/en/latest/miniconda.html)
 - **Git** - [Download](https://git-scm.com/downloads)
 
-### 推荐软件
-- **IntelliJ IDEA** (Java 开发)
-- **PyCharm** (Python 开发)
-- **Node.js** (如果需要前端开发)
-
-## IDE 配置
-
-### IntelliJ IDEA 设置
-
-1. **打开项目**
-   - File → Open → 选择 `java-service` 目录
-
-2. **配置 Maven**
-   - File → Settings → Build, Execution, Deployment → Build Tools → Maven
-   - 确保 Maven home directory 正确
-
-3. **配置 JDK**
-   - File → Project Structure → Project
-   - 设置 SDK 为 Java 21
-   - 设置 Language level 为 21
-
-4. **导入 Spring Boot**
-   - 等待 Maven 依赖下载完成
-   - 运行 `AftersaleApplication.main()`
-
-5. **配置数据库连接**
-   - Database → + → Data Source → MySQL
-   - Host: localhost, Port: 3306
-   - Database: refund_agent
-   - User: root, Password: root
-
-### PyCharm 设置
-
-1. **打开项目**
-   - File → Open → 选择 `python-agent` 目录
-
-2. **创建虚拟环境**
-   ```bash
-   python -m venv .venv
-   ```
-
-3. **选择解释器**
-   - File → Settings → Project: python-agent → Python Interpreter
-   - 选择 `.venv/bin/python` (Linux/Mac) 或 `.venv\Scripts\python.exe` (Windows)
-
-4. **安装依赖**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. **运行应用**
-   - 右键 `app/main.py` → Run 'main'
-   - 或者使用 uvicorn: `uvicorn app.main:app --reload`
+### 虚拟机服务
+- MySQL 8
+- Redis 7
+- Elasticsearch 8
 
 ## 快速启动
 
-### 方式一：Docker Compose（推荐）
+### 步骤 1: 创建数据库
 
+在虚拟机 MySQL 中执行：
 ```bash
-# 启动所有基础设施服务
-docker-compose up -d mysql redis elasticsearch
-
-# 等待服务就绪后，启动应用服务
-docker-compose up -d java-service python-agent
+mysql -u root -p < java-service/src/main/resources/sql/01-create-database.sql
 ```
 
-### 方式二：本地开发
-
-#### 终端 1 - 启动基础设施
-```bash
-docker-compose up -d mysql redis elasticsearch
+或手动执行：
+```sql
+CREATE DATABASE IF NOT EXISTS refund_agent
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
 ```
 
-#### 终端 2 - 启动 Java 服务
+### 步骤 2: 启动 Java 服务
+
 ```bash
 cd java-service
 mvn spring-boot:run
 ```
 
-#### 终端 3 - 启动 Python Agent
+### 步骤 3: 启动 Python Agent
+
 ```bash
 cd python-agent
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+conda create -n refund-agent python=3.12
+conda activate refund-agent
+pip install -r requirements.txt
 uvicorn app.main:app --reload
+```
+
+## 配置文件说明
+
+### Java Service (`application.yml`)
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://192.168.85.66:3306/refund_agent
+    username: root
+    password: ${DB_PASSWORD:root}  # 环境变量或默认值
+  data:
+    redis:
+      host: 192.168.85.66
+      port: 6379
+```
+
+### Python Agent (`.env`)
+
+```bash
+# 复制模板
+cp .env.example .env
+
+# 配置虚拟机地址
+REDIS_URL=redis://192.168.85.66:6379/0
+ELASTICSEARCH_URL=http://192.168.85.66:9200
+```
+
+## VSCode 配置
+
+### 推荐扩展
+
+- `Extension Pack for Java` (Microsoft)
+- `Python` (Microsoft)
+- `Docker` (Microsoft)
+- `GitLens` (GitKraken)
+
+### 启动调试
+
+创建 `launch.json`:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot",
+      "request": "launch",
+      "mainClass": "com.example.aftersale.AftersaleApplication",
+      "projectName": "aftersale-service"
+    },
+    {
+      "type": "python",
+      "name": "FastAPI",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--reload"]
+    }
+  ]
+}
 ```
 
 ## 验证安装
 
-### 检查服务状态
 ```bash
-# 健康检查
-curl http://localhost:8080/health      # Java Service
-curl http://localhost:8000/health      # Python Agent
+# 检查 Java 服务
+curl http://localhost:8080/health
 
-# 检查 Docker 容器
-docker-compose ps
+# 检查 Python Agent
+curl http://localhost:8000/health
+
+# 检查虚拟机服务连通性
+ping 192.168.85.66
 ```
-
-### 访问服务
-- Java Service API: http://localhost:8080
-- Python Agent API: http://localhost:8000
-- MySQL: localhost:3306
-- Redis: localhost:6379
-- Elasticsearch: http://localhost:9200
 
 ## 常见问题
 
-### 1. Maven 依赖下载慢
-在 `pom.xml` 中添加阿里云镜像：
+### 1. 无法连接虚拟机 MySQL
+
+检查虚拟机防火墙和 MySQL 配置：
+```bash
+# 虚拟机上检查 MySQL 是否允许远程连接
+sudo ufw allow 3306
+# 或修改 MySQL 配置 bind-address = 0.0.0.0
+```
+
+### 2. Maven 依赖下载慢
+
+使用阿里云镜像，在 `~/.m2/settings.xml` 中配置：
 ```xml
 <mirrors>
   <mirror>
     <id>aliyun</id>
     <url>https://maven.aliyun.com/repository/public</url>
+    <mirrorOf>central</mirrorOf>
   </mirror>
 </mirrors>
 ```
 
-### 2. Python 包安装失败
+### 3. Python 包安装失败
+
 ```bash
 pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 pip install -r requirements.txt
 ```
 
-### 3. Docker 容器启动失败
+### 4. JDK 版本不对
+
+确保使用 Java 21：
 ```bash
-# 查看日志
-docker-compose logs -f
-
-# 清理并重启
-docker-compose down -v
-docker-compose up -d
+java -version  # 应显示 21.x.x
 ```
 
-### 4. 端口被占用
-修改 `docker-compose.yml` 中的端口映射：
-```yaml
-ports:
-  - "8081:8080"  # 将主机端口改为 8081
-```
+如有多版本，设置 `JAVA_HOME` 环境变量。
 
-## 环境变量配置
+## 环境变量
 
-### Java Service
-复制模板文件并修改：
-```bash
-cp application-template.properties application-local.properties
-```
-
-需要配置的敏感信息：
-- `spring.datasource.password` - 数据库密码
-- `jwt.secret` - JWT 密钥（使用强随机字符串）
-
-### Python Agent
-复制模板文件并修改：
-```bash
-cp .env.example .env
-```
-
-需要配置的敏感信息：
-- `JAVA_API_TOKEN` - 与 Java 服务通信的 Token
-- `OPENAI_API_KEY` - OpenAI API 密钥
-- `LANGFUSE_SECRET_KEY` - Langfuse 观测平台密钥（可选）
-
-## 测试运行
-
-### Java 单元测试
-```bash
-cd java-service
-mvn test
-```
-
-### Python 测试
-```bash
-cd python-agent
-pytest
-```
-
-### API 测试
-```bash
-# 创建任务
-curl -X POST http://localhost:8000/tasks \
-  -H "Content-Type: application/json" \
-  -d '{"userId":"U1001","content":"课程打不开，订单号O20260622001"}'
-```
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `DB_PASSWORD` | MySQL 密码 | `root` |
+| `JWT_SECRET` | JWT 密钥 | 需自行设置 |
+| `OPENAI_API_KEY` | OpenAI API 密钥 | 需自行设置 |
