@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "gpt-4"
     LLM_TEMPERATURE: float = 0.1
     LLM_MAX_TOKENS: int = 2000
+    OPENAI_API_KEY: str | None = None
 
     # Embedding
     EMBEDDING_MODEL: str = "text-embedding-ada-002"
@@ -42,6 +43,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        extra = "ignore"  # 忽略未定义的环境变量
 
 
 settings = Settings()
