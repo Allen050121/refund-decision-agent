@@ -1,6 +1,6 @@
 {
     "version":  1,
-    "updatedAt":  "2026-06-24T10:00:00.0000000+08:00",
+    "updatedAt":  "2026-06-24T16:15:00.0000000+08:00",
     "tasks":  [
                   {
                       "task_id":  "TASK-000-SECURITY",
@@ -27,6 +27,28 @@
                   {
                       "task_id":  "TASK-001",
                       "title":  "阶段 1: Java 确定性业务底座 - 领域模型与退款资格校验",
+                      "status":  "completed",
+                      "task_type":  "implementation",
+                      "delivery_stage":  "stack",
+                      "mode":  "standard",
+                      "work_mode":  "sequential",
+                      "workflow_mode":  "standard",
+                      "branch":  "master",
+                      "github_issue":  "",
+                      "github_pr":  "",
+                      "ci_status":  "",
+                      "dependencies":  [],
+                      "last_run_id":  "",
+                      "last_result":  "all_api_tests_passed",
+                      "blocked_reason":  "",
+                      "verification_status":  "passed",
+                      "updated_at":  "2026-06-24T16:15:00.0000000+08:00",
+                      "business":  "实现 Java 确定性业务底座，包含领域模型和退款资格校验服务，使退款决策能由确定性业务规则计算而非依赖模型判断。",
+                      "task_card":  ".ai-team/tasks/TASK-001-java-domain-model.md"
+                  },
+                  {
+                      "task_id":  "TASK-002",
+                      "title":  "阶段 2: Python Agent 最小链路 - LangGraph 工作流与 Java API 集成",
                       "status":  "pending",
                       "task_type":  "implementation",
                       "delivery_stage":  "stack",
@@ -37,14 +59,14 @@
                       "github_issue":  "",
                       "github_pr":  "",
                       "ci_status":  "",
-                      "dependencies":  [],
+                      "dependencies":  ["TASK-001"],
                       "last_run_id":  "",
                       "last_result":  "",
                       "blocked_reason":  "",
                       "verification_status":  "not_run",
-                      "updated_at":  "2026-06-23T16:07:19.0708480+08:00",
-                      "business":  "实现 Java 确定性业务底座，包含领域模型和退款资格校验服务，使退款决策能由确定性业务规则计算而非依赖模型判断。",
-                      "task_card":  ".ai-team/tasks/TASK-001-java-domain-model.md"
+                      "updated_at":  "2026-06-24T16:15:00.0000000+08:00",
+                      "business":  "实现 Python Agent 最小链路，包含 LangGraph 工作流框架、工具定义（调用 Java API）、以及基本的退款决策流程。",
+                      "task_card":  ".ai-team/tasks/TASK-002-python-agent-workflow.md"
                   }
               ]
 }
