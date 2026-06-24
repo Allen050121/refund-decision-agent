@@ -56,6 +56,10 @@ secrets/
 credentials/
 aws-credentials.properties
 service-account.json
+*.api.key
+*.apikey
+openai_key.txt
+api_keys.txt
 
 # ===== OS =====
 .DS_Store
