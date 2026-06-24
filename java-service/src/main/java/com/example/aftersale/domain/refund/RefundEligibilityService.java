@@ -4,6 +4,8 @@ import com.example.aftersale.domain.course.Course;
 import com.example.aftersale.domain.learning.LearningProgress;
 import com.example.aftersale.domain.order.Order;
 import com.example.aftersale.domain.shared.*;
+import com.example.aftersale.infrastructure.config.RefundProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,25 +23,13 @@ import java.util.List;
  * - Agent 只能获取建议上限，不能自行决定最终退款金额
  */
 @Service
+@RequiredArgsConstructor
 public class RefundEligibilityService {
 
-    // 默认配置（实际应从 system_config 表读取）
-    private static final int DEFAULT_MAX_REFUND_DAYS = 7;
-    private static final BigDecimal DEFAULT_MAX_PROGRESS_PERCENTAGE = BigDecimal.valueOf(30);
-    private static final int APPROVAL_THRESHOLD_CENTS = 50000;  // 500元
-    private static final int ABNORMAL_REFUND_THRESHOLD = 3;
+    private final RefundProperties refundProperties;
 
     /**
      * 校验退款资格
-     *
-     * @param order 订单
-     * @param progress 学习进度（可为null）
-     * @param course 课程（可为null）
-     * @param reasonCode 退款原因码
-     * @param requesterUserId 请求用户ID
-     * @param abnormalRefundCount 用户异常退款次数
-     * @param now 当前时间
-     * @return 退款资格校验结果
      */
     public RefundEligibilityResult checkEligibility(
             Order order,
@@ -72,7 +62,7 @@ public class RefundEligibilityService {
                 reasonCode, evidence, now);
 
         // 4. 风险检查：异常退款记录
-        if (result.isEligible() && abnormalRefundCount >= ABNORMAL_REFUND_THRESHOLD) {
+        if (result.isEligible() && abnormalRefundCount >= refundProperties.getAbnormalRefundThreshold()) {
             return RefundEligibilityResult.needsApproval(
                     result.getDecisionCode(),
                     result.getMaxRefundAmount(),
@@ -83,7 +73,7 @@ public class RefundEligibilityService {
 
         // 5. 金额超过阈值需要审批
         if (result.isEligible() && !result.isApprovalRequired()
-                && result.getMaxRefundAmount().isGreaterThan(Money.ofCents(APPROVAL_THRESHOLD_CENTS))) {
+                && result.getMaxRefundAmount().isGreaterThan(Money.ofCents(refundProperties.getApprovalThresholdAmount()))) {
             return RefundEligibilityResult.needsApproval(
                     result.getDecisionCode(),
                     result.getMaxRefundAmount(),
@@ -95,16 +85,9 @@ public class RefundEligibilityService {
         return result;
     }
 
-    /**
-     * 根据原因码校验退款资格
-     */
     private RefundEligibilityResult checkByReasonCode(
-            Order order,
-            LearningProgress progress,
-            Course course,
-            ReasonCode reasonCode,
-            List<String> evidence,
-            LocalDateTime now) {
+            Order order, LearningProgress progress, Course course,
+            ReasonCode reasonCode, List<String> evidence, LocalDateTime now) {
 
         switch (reasonCode) {
             case COURSE_UNAVAILABLE:
@@ -124,9 +107,6 @@ public class RefundEligibilityService {
         }
     }
 
-    /**
-     * 课程不可用退款校验
-     */
     private RefundEligibilityResult checkCourseUnavailable(Order order, Course course, List<String> evidence) {
         if (course == null) {
             return RefundEligibilityResult.notEligible("COURSE_INFO_MISSING", "缺少课程信息");
@@ -139,94 +119,67 @@ public class RefundEligibilityService {
         evidence.add("COURSE_UNAVAILABLE");
         evidence.add("COURSE_REASON: " + course.getUnavailableReason());
 
-        return RefundEligibilityResult.builder()
-                .eligible(true)
-                .decisionCode("COURSE_SERVICE_FAILURE")
-                .maxRefundAmount(order.getMaxRefundAmount())
-                .approvalRequired(false)
-                .evidence(evidence)
-                .riskLevel("MEDIUM")
-                .build();
+        return new RefundEligibilityResult(
+                true, "COURSE_SERVICE_FAILURE", order.getMaxRefundAmount(),
+                false, null, evidence, null, "MEDIUM"
+        );
     }
 
-    /**
-     * 重复购买退款校验
-     */
     private RefundEligibilityResult checkDuplicatePurchase(Order order, List<String> evidence) {
-        // 重复购买的校验需要查询是否有其他同课程订单
-        // 这里简化处理，实际应调用其他服务
         evidence.add("DUPLICATE_PURCHASE_CHECKED");
 
-        return RefundEligibilityResult.builder()
-                .eligible(true)
-                .decisionCode("DUPLICATE_PURCHASE_REFUND")
-                .maxRefundAmount(order.getMaxRefundAmount())
-                .approvalRequired(false)
-                .evidence(evidence)
-                .riskLevel("LOW")
-                .build();
+        return new RefundEligibilityResult(
+                true, "DUPLICATE_PURCHASE_REFUND", order.getMaxRefundAmount(),
+                false, null, evidence, null, "LOW"
+        );
     }
 
-    /**
-     * 无理由退款校验
-     */
     private RefundEligibilityResult checkNoReasonRefund(
             Order order, LearningProgress progress, Course course,
             List<String> evidence, LocalDateTime now) {
 
-        // 促销课程不支持无理由退款
         if (course != null && course.isPromotional()) {
             return RefundEligibilityResult.notEligible("PROMOTIONAL_LIMIT", "促销课程不支持无理由退款");
         }
 
-        // 检查退款有效期
         long daysSincePayment = order.daysSincePayment(now);
-        if (daysSincePayment > DEFAULT_MAX_REFUND_DAYS) {
+        if (daysSincePayment > refundProperties.getMaxRefundDaysNoReason()) {
             evidence.add("EXPIRED_DAYS: " + daysSincePayment);
             return RefundEligibilityResult.notEligible("EXPIRED_WINDOW",
-                    "超过无理由退款有效期（" + DEFAULT_MAX_REFUND_DAYS + "天）");
+                    "超过无理由退款有效期（" + refundProperties.getMaxRefundDaysNoReason() + "天）");
         }
         evidence.add("WITHIN_REFUND_WINDOW");
 
-        // 检查学习进度
-        if (progress != null && progress.exceedsDefaultLimit()) {
+        BigDecimal maxProgress = BigDecimal.valueOf(refundProperties.getMaxProgressPercentage());
+        if (progress != null && progress.exceedsLimit(maxProgress)) {
             evidence.add("PROGRESS: " + progress.getProgressPercentageInt() + "%");
             return RefundEligibilityResult.notEligible("EXCEEDED_PROGRESS",
-                    "学习进度超过限制（" + DEFAULT_MAX_PROGRESS_PERCENTAGE + "%）");
+                    "学习进度超过限制（" + maxProgress + "%）");
         }
         evidence.add("PROGRESS_WITHIN_LIMIT");
 
-        return RefundEligibilityResult.builder()
-                .eligible(true)
-                .decisionCode("NO_REASON_REFUND")
-                .maxRefundAmount(order.getMaxRefundAmount())
-                .approvalRequired(false)
-                .evidence(evidence)
-                .riskLevel("LOW")
-                .build();
+        return new RefundEligibilityResult(
+                true, "NO_REASON_REFUND", order.getMaxRefundAmount(),
+                false, null, evidence, null, "LOW"
+        );
     }
 
-    /**
-     * 通用退款校验（其他情况）
-     */
     private RefundEligibilityResult checkGeneralRefund(
             Order order, LearningProgress progress,
             List<String> evidence, LocalDateTime now) {
 
-        // 检查是否在退款期内
         long daysSincePayment = order.daysSincePayment(now);
-        if (daysSincePayment > DEFAULT_MAX_REFUND_DAYS) {
+        if (daysSincePayment > refundProperties.getMaxRefundDaysNoReason()) {
             return RefundEligibilityResult.notEligible("EXPIRED_WINDOW", "超过退款有效期");
         }
         evidence.add("WITHIN_WINDOW");
 
-        // 检查学习进度
-        if (progress != null && progress.exceedsDefaultLimit()) {
+        BigDecimal maxProgress = BigDecimal.valueOf(refundProperties.getMaxProgressPercentage());
+        if (progress != null && progress.exceedsLimit(maxProgress)) {
             return RefundEligibilityResult.notEligible("EXCEEDED_PROGRESS", "学习进度超过限制");
         }
         evidence.add("PROGRESS_OK");
 
-        // 通用情况需要审批
         return RefundEligibilityResult.needsApproval(
                 "GENERAL_REFUND",
                 order.getMaxRefundAmount(),
