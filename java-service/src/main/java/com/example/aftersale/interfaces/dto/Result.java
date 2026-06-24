@@ -73,6 +73,10 @@ public class Result<T> implements Serializable {
         return new Result<>(403, message);
     }
 
+    public static <T> Result<T> badRequest(String message) {
+        return new Result<>(400, message);
+    }
+
     public static <T> Result<T> systemError(String message) {
         return new Result<>(500, message);
     }

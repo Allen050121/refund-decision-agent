@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd.exe /c \"taskkill /F /PID 42572\")",
+      "Bash(cmd.exe /c \"netstat -ano | findstr :8080\")",
+      "Bash(mvn spring-boot:run -Dspring-boot.run.profiles=local)",
+      "Bash(findstr LISTENING)",
+      "Bash(powershell -Command \"Stop-Process -Id 42572 -Force\")",
+      "Bash(curl http://localhost:8080/actuator)",
+      "Bash(curl http://localhost:8080/api/orders/O20260622001 -H \"X-Requester-User-Id: U1001\")",
+      "Bash(powershell -Command \"Stop-Process -Id 19380 -Force\")",
+      "Bash(tee /tmp/java-service.log)",
+      "Bash(curl http://localhost:8080/api/orders/O20260622001 -H \"X-Requester-User-Id: U1001\" -v)",
+      "Bash(curl \"http://localhost:8080/api/learning/O20260622001?requesterUserId=U1001\")",
+      "Bash(curl \"http://localhost:8080/api/courses/C2001/status\")",
+      "Bash(curl \"http://localhost:8080/api/orders/O20260622001?requesterUserId=U1001\")"
+    ]
+  }
+}

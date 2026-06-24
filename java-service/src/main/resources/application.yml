@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  profiles:
+    active: local  # 默认激活 local profile，连接虚拟机数据库
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/refund_agent?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     username: ${DB_USERNAME:root}

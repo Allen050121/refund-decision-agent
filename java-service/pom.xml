@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>aftersale-service</artifactId>
+    <artifactId>java-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>aftersale-service</name>
     <description>售后退款决策 Agent - Java 业务服务</description>
