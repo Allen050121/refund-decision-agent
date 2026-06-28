@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     # Java API (本地运行)
     JAVA_API_URL: str = "http://localhost:8080"
     JAVA_API_TOKEN: str = "internal-service-token"
+    JAVA_API_TIMEOUT: int = 10  # 秒
 
     # Redis (Virtual Machine)
     REDIS_URL: str = "redis://192.168.85.66:6379/0"

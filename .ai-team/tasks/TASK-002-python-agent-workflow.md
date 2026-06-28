@@ -1,7 +1,7 @@
 ---
 title: "阶段 2: Python Agent 最小链路 - LangGraph 工作流与 Java API 集成"
 task_id: "TASK-002"
-status: "pending"
+status: "completed"
 owner: "ai-engineer"
 task_type: "implementation"
 delivery_stage: "stack"
@@ -11,11 +11,11 @@ workflow_mode: "standard"
 created: "2026-06-24"
 dependencies:
   - TASK-001
-verification_status: not_run
+verification_status: passed
 last_run_id:
-last_result:
+last_result: "all_56_tests_passed"
 blocked_reason:
-branch:
+branch: "master"
 github_issue:
 github_pr:
 ci_status:
