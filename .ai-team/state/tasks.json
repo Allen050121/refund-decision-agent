@@ -1,6 +1,6 @@
 ﻿{
     "version":  1,
-    "updatedAt":  "2026-06-29T10:42:34.6241097+08:00",
+    "updatedAt":  "2026-06-29T17:17:34.3687779+08:00",
     "tasks":  [
                   {
                       "task_id":  "TASK-000-SECURITY",
@@ -19,7 +19,7 @@
                       "last_result":  "",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.5893015+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3305426+08:00",
                       "business":  "建立严格的安全配置规范，确保 API Key、密码、虚拟机地址等敏感信息不会被上传到 Git 仓库。",
                       "task_card":  ".ai-team/tasks/TASK-000-SECURITY.md"
                   },
@@ -40,7 +40,7 @@
                       "last_result":  "java_mvn_test_build_success_no_test_sources",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.5990677+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3410445+08:00",
                       "business":  "实现 Java 确定性业务底座，包含领域模型和退款资格校验服务，使退款决策能由确定性业务规则计算而非依赖模型判断。",
                       "task_card":  ".ai-team/tasks/TASK-001-java-domain-model.md"
                   },
@@ -61,7 +61,7 @@
                       "last_result":  "all_56_tests_passed",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6011656+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3430449+08:00",
                       "business":  "实现 Python Agent 最小链路，包含 LangGraph 工作流框架、工具定义（调用 Java API）、以及基本的退款决策流程。",
                       "task_card":  ".ai-team/tasks/TASK-002-python-agent-workflow.md"
                   },
@@ -82,7 +82,7 @@
                       "last_result":  "recall@3=1.0,all_tests_passed",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6032150+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3450459+08:00",
                       "business":  "实现退款规则的 RAG 检索能力，使用 Elasticsearch BM25 进行基线检索，支持元数据过滤和规则冲突检测。",
                       "task_card":  ".ai-team/tasks/TASK-003-rag-retrieval.md"
                   },
@@ -103,7 +103,7 @@
                       "last_result":  "72_tests_passed,redis_streams_verified",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6044668+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3474136+08:00",
                       "business":  "实现 Redis Streams 异步任务消费机制，支持消费组、心跳、自动恢复和事件发布。",
                       "task_card":  ".ai-team/tasks/TASK-004-redis-streams.md"
                   },
@@ -124,7 +124,7 @@
                       "last_result":  "85_tests_passed,120_test_cases,security_verified",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6070068+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3484128+08:00",
                       "business":  "扩充测试集到 120 条，实现模型/Prompt 回归测试、Token 成本追踪、Prompt Injection 和越权测试，支持一条命令执行完整评测。",
                       "task_card":  ".ai-team/tasks/TASK-005-evaluation-security.md"
                   },
@@ -145,7 +145,7 @@
                       "last_result":  "readme_architecture_report_resume_docker_compose",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6098782+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3509197+08:00",
                       "business":  "生成项目展示材料：README、架构图、评测报告、Docker Compose 配置，以及简历项目描述草稿。",
                       "task_card":  ".ai-team/tasks/TASK-006-showcase.md"
                   },
@@ -166,7 +166,7 @@
                       "last_result":  "java_build_success_python_88_passed_no_warnings",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6148698+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3574220+08:00",
                       "business":  "让项目从“功能完成”进入“简历展示/面试追问更稳”的状态：修复工程警告、清理测试弃用提示、补齐 AI Team 记忆和仓库索引，并同步任务状态，确保 Codex 和 Claude 后续都能读到一致上下文。",
                       "task_card":  ".ai-team/tasks/task-007-engineering-polish.md"
                   },
@@ -187,7 +187,7 @@
                       "last_result":  "smoke_6_passed_python_91_passed_java_6_passed",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6175657+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3604267+08:00",
                       "business":  "让测试数据和冒烟验证能支撑简历项目展示：提供可重复的离线金标用例、Java 领域规则单测、Python Agent 回归断言，并在 README/项目状态中写清验证命令。",
                       "task_card":  ".ai-team/tasks/task-008-test-smoke-readiness.md"
                   },
@@ -208,7 +208,7 @@
                       "last_result":  "demo_report_generated_smoke_6_passed_python_91_passed_java_6_passed",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6191626+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3616661+08:00",
                       "business":  "提供一个不需要启动服务的静态 Demo 展示入口：运行离线冒烟后生成 `docs/demo-report.html`，让面试展示可以直接看到用例、决策分布、规则引用、风险提示和证据。",
                       "task_card":  ".ai-team/tasks/task-009-demo-report.md"
                   },
@@ -229,7 +229,7 @@
                       "last_result":  "service_smoke_ready_pytest_91_passed_java_6_passed",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6205665+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3637798+08:00",
                       "business":  "提供一个项目启动后的真实服务冒烟脚本：用户启动 Java/Python 服务后，一条命令检查健康接口、SQL 种子数据查询接口和 Java 退款资格接口，补齐离线 demo 到真实运行之间的验证链路。",
                       "task_card":  ".ai-team/tasks/task-010-service-smoke.md"
                   },
@@ -250,7 +250,7 @@
                       "last_result":  "real_llm_4_passed_service_7_passed_python_91_passed_java_6_passed",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6215667+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3657792+08:00",
                       "business":  "提供一个真实大模型参与的 Agent 链路冒烟脚本，验证分类、推荐、确定性规则校正、缺字段兜底和非退款请求兜底，作为前端 Demo 与面试展示前的模型链路证据。",
                       "task_card":  ".ai-team/tasks/task-011-real-llm-agent-smoke.md"
                   },
@@ -271,9 +271,30 @@
                       "last_result":  "demo_route_test_passed_real_llm_4_passed_service_7_passed_python_92_passed_java_6_passed",
                       "blocked_reason":  "",
                       "verification_status":  "passed",
-                      "updated_at":  "2026-06-29T10:42:34.6241097+08:00",
+                      "updated_at":  "2026-06-29T17:17:34.3667791+08:00",
                       "business":  "提供一个最小前端 Demo 控制台，挂载在 Python 服务 `/demo`，可选择 demo 工单、查看服务健康状态、创建真实 `/tasks` Agent 任务并轮询展示决策、规则引用、证据和风险提示。",
                       "task_card":  ".ai-team/tasks/task-012-demo-console.md"
+                  },
+                  {
+                      "task_id":  "task-013-interview-walkthrough",
+                      "title":  "面试讲解文档",
+                      "status":  "done",
+                      "mode":  "serial",
+                      "work_mode":  "MVP",
+                      "branch":  "",
+                      "github_issue":  "",
+                      "github_pr":  "",
+                      "ci_status":  "",
+                      "dependencies":  [
+                                           "task-012-demo-console"
+                                       ],
+                      "last_run_id":  "task-013-interview-walkthrough-executor-202606291712",
+                      "last_result":  "interview_walkthrough_doc_created",
+                      "blocked_reason":  "",
+                      "verification_status":  "passed",
+                      "updated_at":  "2026-06-29T17:17:34.3687779+08:00",
+                      "business":  "Create a detailed interview walkthrough document for the refund decision Agent project under the user\u0027s interview notes directory. The document should help the user explain project positioning, architecture, Agent orchestration, context engineering, testing evidence, strengths, limitations, and common interview follow-up questions.",
+                      "task_card":  ".ai-team/tasks/task-013-interview-walkthrough.md"
                   }
               ]
 }
