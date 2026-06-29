@@ -4,6 +4,7 @@ OpenAI LLM 客户端实现
 文档 5.3: 模型超时 -> 重试一次，再切备用模型
 """
 import logging
+import inspect
 from typing import Optional, List, Dict, Any
 
 import httpx
@@ -17,6 +18,7 @@ from app.domain.exceptions import (
 )
 
 logger = logging.getLogger(__name__)
+SUPPORTS_HTTPX_PROXY = "proxy" in inspect.signature(httpx.AsyncClient).parameters
 
 
 class OpenAILLMClient(LLMPort):
@@ -30,15 +32,17 @@ class OpenAILLMClient(LLMPort):
     def __init__(
         self,
         api_key: Optional[str] = None,
-        base_url: str = "https://api.openai.com/v1",
+        base_url: Optional[str] = None,
         default_model: Optional[str] = None,
         fallback_model: Optional[str] = None,
+        proxy_url: Optional[str] = None,
         timeout: float = 30.0,
     ):
         self.api_key = api_key or settings.OPENAI_API_KEY
-        self.base_url = base_url
+        self.base_url = (base_url or settings.LLM_BASE_URL).rstrip("/")
         self.default_model = default_model or settings.LLM_MODEL
         self.fallback_model = fallback_model or "gpt-3.5-turbo"
+        self.proxy_url = proxy_url if proxy_url is not None else settings.LLM_PROXY_URL
         self.timeout = timeout
 
     @retry(
@@ -165,7 +169,17 @@ class OpenAILLMClient(LLMPort):
 
         logger.info(f"调用 LLM | model={model} | messages_count={len(messages)}")
 
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
+        client_kwargs: Dict[str, Any] = {"timeout": self.timeout}
+        if self.proxy_url:
+            if SUPPORTS_HTTPX_PROXY:
+                client_kwargs["proxy"] = self.proxy_url
+            else:
+                client_kwargs["proxies"] = {
+                    "http://": self.proxy_url,
+                    "https://": self.proxy_url,
+                }
+
+        async with httpx.AsyncClient(**client_kwargs) as client:
             try:
                 response = await client.post(
                     f"{self.base_url}/chat/completions",

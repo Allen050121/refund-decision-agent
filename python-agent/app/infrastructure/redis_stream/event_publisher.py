@@ -6,7 +6,7 @@ Redis 事件发布器
 """
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 
 import redis.asyncio as redis
@@ -15,6 +15,10 @@ from app.application.ports.event_publisher_port import EventPublisherPort
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class RedisEventPublisher(EventPublisherPort):
@@ -53,7 +57,7 @@ class RedisEventPublisher(EventPublisherPort):
         event_data = {
             "eventId": str(uuid.uuid4()),
             "sequence": str(self._sequences[task_id]),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now().isoformat(),
             **{k: str(v) if not isinstance(v, str) else v for k, v in event.items()},
         }
 
@@ -91,5 +95,5 @@ class RedisEventPublisher(EventPublisherPort):
     async def close(self) -> None:
         """关闭 Redis 连接"""
         if self._redis:
-            await self._redis.close()
+            await self._redis.aclose()
             self._redis = None

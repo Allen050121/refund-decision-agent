@@ -81,7 +81,7 @@ async def _check_redis() -> dict:
 
         r = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
         await r.ping()
-        await r.close()
+        await r.aclose()
         return {"status": "ok"}
     except Exception as e:
         return {"status": "error", "message": str(e)}

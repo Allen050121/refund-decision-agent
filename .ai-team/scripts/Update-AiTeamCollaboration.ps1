@@ -180,4 +180,3 @@ switch ($Action) {
 }
 
 Write-StateSummary $state
-

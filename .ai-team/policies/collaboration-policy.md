@@ -38,8 +38,7 @@ When stopping mid-task, the active client must record:
 Use:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .ai-team/scripts/Update-AiTeamCollaboration.ps1 -Action handoff -Client codex -TaskId <task-id> -Summary "..." -NextAction "..."
+powershell -NoProfile -ExecutionPolicy Bypass -File .ai-team/scripts/Update-AiTeamCollaboration.ps1 -Action handoff -Client claude -TaskId <task-id> -Summary "..." -NextAction "..."
 ```
 
 When a task is fully released or no longer active, clear the active session with `-Action complete`.
-

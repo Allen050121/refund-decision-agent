@@ -202,10 +202,7 @@ function Show-TaskStateSummary {
     }
 
     Write-Host ("- {0} [{1}] {2}" -f $task.task_id, $task.status, $task.title)
-    if ($task.task_type) { Write-Host ("  task_type: {0}" -f $task.task_type) }
-    if ($task.delivery_stage) { Write-Host ("  delivery_stage: {0}" -f $task.delivery_stage) }
     if ($task.work_mode) { Write-Host ("  work_mode: {0}" -f $task.work_mode) }
-    if ($task.workflow_mode) { Write-Host ("  workflow_mode: {0}" -f $task.workflow_mode) }
     if ($task.mode) { Write-Host ("  mode: {0}" -f $task.mode) }
     if ($task.dependencies -and @($task.dependencies).Count -gt 0) {
         Write-Host ("  dependencies: {0}" -f (@($task.dependencies) -join ", "))
@@ -216,63 +213,6 @@ function Show-TaskStateSummary {
     if ($task.blocked_reason) { Write-Host ("  blocked: {0}" -f $task.blocked_reason) }
     if ($task.branch -or $task.github_issue -or $task.github_pr -or $task.ci_status) {
         Write-Host ("  github: branch={0}; issue={1}; pr={2}; ci={3}" -f $task.branch, $task.github_issue, $task.github_pr, $task.ci_status)
-    }
-}
-
-function Show-CollaborationSummary {
-    param(
-        [string]$TaskId,
-        [string]$Path
-    )
-
-    Write-Host ""
-    Write-Host "===== Collaboration State ====="
-
-    if (-not (Test-Path -LiteralPath $Path)) {
-        Write-Host "Missing: $Path"
-        return
-    }
-
-    if ($Full -or $Mode -eq "full") {
-        Get-Content -LiteralPath $Path -Encoding UTF8
-        return
-    }
-
-    try {
-        $state = Get-Content -LiteralPath $Path -Encoding UTF8 -Raw | ConvertFrom-Json
-    }
-    catch {
-        Write-Host "Collaboration state exists but could not be parsed: $Path"
-        return
-    }
-
-    $active = @($state.active)
-    if ($TaskId) {
-        $active = @($active | Where-Object { $_.task_id -eq $TaskId })
-    }
-
-    if ($active.Count -eq 0) {
-        Write-Host "No active Codex/Claude session for this context."
-    }
-    else {
-        foreach ($session in $active) {
-            Write-Host ("- active {0}: task={1}; client={2}; role={3}; started={4}" -f $session.session_id, $session.task_id, $session.client, $session.role, $session.started_at)
-            if ($session.summary) { Write-Host ("  summary: {0}" -f $session.summary) }
-        }
-    }
-
-    $handoffs = @($state.handoffs)
-    if ($TaskId) {
-        $handoffs = @($handoffs | Where-Object { $_.task_id -eq $TaskId })
-    }
-
-    $latestHandoff = $handoffs |
-        Sort-Object @{ Expression = { $_.created_at }; Descending = $true } |
-        Select-Object -First 1
-
-    if ($latestHandoff) {
-        Write-Host ("Latest handoff: {0}; from={1}; next={2}" -f $latestHandoff.handoff_id, $latestHandoff.client, $latestHandoff.next_action)
-        if ($latestHandoff.summary) { Write-Host ("Handoff summary: {0}" -f $latestHandoff.summary) }
     }
 }
 
@@ -289,9 +229,6 @@ Show-Section "Repo Map" (Join-Path $ProjectRoot ".ai-team\index\repo-map.md") 80
 Show-Section "Pitfalls" (Join-Path $ProjectRoot ".ai-team\memory\pitfalls.md") 80 160
 Show-Section "Patterns" (Join-Path $ProjectRoot ".ai-team\memory\patterns.md") 80 160
 Show-Section "Command Policy" (Join-Path $ProjectRoot ".ai-team\policies\command-policy.md") 80 120
-Show-Section "Workflow Modes" (Join-Path $ProjectRoot ".ai-team\policies\workflow-modes.md") 80 140
-Show-Section "Collaboration Policy" (Join-Path $ProjectRoot ".ai-team\policies\collaboration-policy.md") 80 120
-Show-CollaborationSummary $TaskId (Join-Path $ProjectRoot ".ai-team\state\collaboration.json")
 
 if ($TaskId) {
     $taskPath = Join-Path $ProjectRoot ".ai-team\tasks\$TaskId.md"

@@ -2,10 +2,14 @@
 任务领域模型
 文档 6.1: 任务创建与消费
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class TaskStatus(str, Enum):
@@ -54,7 +58,7 @@ class Task(BaseModel):
     timeout_seconds: int = Field(default=300, description="超时时间（秒）")
 
     # 时间戳
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=utc_now)
     started_at: Optional[datetime] = Field(None, description="开始处理时间")
     completed_at: Optional[datetime] = Field(None, description="完成时间")
 
@@ -68,6 +72,3 @@ class Task(BaseModel):
     # Trace - 文档 10
     trace_id: Optional[str] = Field(None, description="追踪 ID")
     message_id: Optional[str] = Field(None, description="Redis 消息 ID")
-
-    class Config:
-        json_encoders = {datetime: lambda v: v.isoformat()}

@@ -1,10 +1,14 @@
 """
 退款决策领域模型
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional, List
 from pydantic import BaseModel, Field
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class DecisionType(str, Enum):
@@ -59,4 +63,4 @@ class RefundDecision(BaseModel):
     estimated_cost: float = Field(default=0.0, description="预估成本（美元）")
 
     # 时间
-    decided_at: datetime = Field(default_factory=datetime.utcnow)
+    decided_at: datetime = Field(default_factory=utc_now)

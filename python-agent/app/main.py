@@ -50,8 +50,10 @@ def _init_ports():
     if settings.OPENAI_API_KEY:
         from app.infrastructure.llm import OpenAILLMClient
 
-        llm_port = OpenAILLMClient()
-        logger.info("LLM Port: OpenAI 客户端已初始化")
+        llm_port = OpenAILLMClient(
+            base_url=settings.LLM_BASE_URL,
+        )
+        logger.info(f"LLM Port: 使用模型 {settings.LLM_MODEL} @ {settings.LLM_BASE_URL}")
     else:
         logger.warning("OPENAI_API_KEY 未配置，LLM 功能将使用规则匹配回退")
 
@@ -80,10 +82,11 @@ def create_app() -> FastAPI:
     )
 
     # 注册路由
-    from app.api import health, tasks
+    from app.api import demo, health, tasks
 
     app.include_router(health.router, prefix="/health", tags=["health"])
     app.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
+    app.include_router(demo.router, prefix="/demo", tags=["demo"])
 
     return app
 

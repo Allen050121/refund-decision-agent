@@ -1,8 +1,22 @@
-from pydantic_settings import BaseSettings
+"""
+应用配置
+"""
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+ENV_FILE = Path(__file__).resolve().parents[1] / ".env"
 
 
 class Settings(BaseSettings):
     """应用配置"""
+
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE,
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
     # 服务配置
     APP_HOST: str = "0.0.0.0"
@@ -23,7 +37,9 @@ class Settings(BaseSettings):
     ELASTICSEARCH_INDEX: str = "refund-rules"
 
     # LLM
-    LLM_MODEL: str = "gpt-4"
+    LLM_MODEL: str = "claude-sonnet-4-6"
+    LLM_BASE_URL: str = "https://cc.freemodel.dev/v1"
+    LLM_PROXY_URL: str | None = None
     LLM_TEMPERATURE: float = 0.1
     LLM_MAX_TOKENS: int = 2000
     OPENAI_API_KEY: str | None = None
@@ -41,10 +57,6 @@ class Settings(BaseSettings):
     MAX_MODEL_CALLS: int = 10
     MAX_TOOL_CALLS: int = 15
     MAX_TOKEN_COST: float = 1.0  # 美元
-
-    class Config:
-        env_file = ".env"
-        extra = "ignore"  # 忽略未定义的环境变量
 
 
 settings = Settings()

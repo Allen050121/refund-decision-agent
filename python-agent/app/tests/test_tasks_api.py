@@ -106,3 +106,13 @@ async def test_readiness_check():
         data = response.json()
         assert "status" in data
         assert "checks" in data
+
+
+@pytest.mark.asyncio
+async def test_demo_console_page():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.get("/demo")
+        assert response.status_code == 200
+        assert "售后退款决策 Agent 控制台" in response.text
+        assert "/tasks" in response.text

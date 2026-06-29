@@ -12,7 +12,7 @@ import asyncio
 import logging
 import socket
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Callable, Awaitable, Dict, Any
 
 import redis.asyncio as redis
@@ -22,6 +22,10 @@ from app.config import settings
 from app.domain.models.task import Task, TaskStatus
 
 logger = logging.getLogger(__name__)
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 # 回调类型: 接收 Task，返回处理结果
 TaskHandler = Callable[[Task], Awaitable[None]]
@@ -110,7 +114,7 @@ class RedisStreamConsumer:
         """停止消费"""
         self._running = False
         if self._redis:
-            await self._redis.close()
+            await self._redis.aclose()
             self._redis = None
         logger.info("消费者已停止")
 
@@ -159,7 +163,7 @@ class RedisStreamConsumer:
             logger.info(f"处理任务消息 | task_id={task.task_id} | message_id={message_id}")
 
             # 更新心跳
-            task.last_heartbeat_at = datetime.utcnow()
+            task.last_heartbeat_at = utc_now()
             if self._task_repository:
                 await self._task_repository.save(task)
 

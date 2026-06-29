@@ -84,6 +84,24 @@ async def test_full_workflow_missing_fields():
     missing = final_state.get("missing_fields", [])
     assert len(missing) > 0
     assert "user_id" in missing or "order_id" in missing
+    assert final_state["decision"] == DecisionEnum.NEED_MORE_INFORMATION
+
+
+@pytest.mark.asyncio
+async def test_full_workflow_other_intent_needs_more_information():
+    state = AgentState(
+        task_id="T-003-A",
+        user_id="U1003",
+        ticket_content="我想咨询一下 Java 课程大纲和上课时间",
+    )
+
+    from app.agent.graph import graph
+
+    compiled = graph.compile()
+    final_state = await compiled.ainvoke(state)
+
+    assert final_state["intent"] == IntentEnum.OTHER
+    assert final_state["decision"] == DecisionEnum.NEED_MORE_INFORMATION
 
 
 @pytest.mark.asyncio

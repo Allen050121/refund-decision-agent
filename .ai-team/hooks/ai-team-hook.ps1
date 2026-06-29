@@ -10,6 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 $ProjectRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $configPath = Join-Path $ProjectRoot ".ai-team\config.json"
+$collaborationScript = Join-Path $ProjectRoot ".ai-team\scripts\Update-AiTeamCollaboration.ps1"
 
 if (-not (Test-Path -LiteralPath $configPath)) {
     throw "Missing config: $configPath"
@@ -54,6 +55,16 @@ Write-Host "- Follow the loaded role prompt."
 Write-Host "- Use the memory files as durable project context."
 Write-Host "- Stay inside the task card boundaries."
 Write-Host "- Do not skip the relevant gate checklist."
+Write-Host "- Check collaboration state before editing when Codex and Claude may share this project."
+
+if (Test-Path -LiteralPath $collaborationScript) {
+    Write-Host ""
+    Write-Host "===== Collaboration State ====="
+    & $collaborationScript -Action status -Client other
+    Write-Host ""
+    Write-Host "Before editing, claim the task with:"
+    Write-Host "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-team/scripts/Update-AiTeamCollaboration.ps1 -Action start -Client <codex|claude> -TaskId <task-id> -Role $Role"
+}
 
 $rolePrompt = $config.rolePrompts.$Role
 if ($rolePrompt) {

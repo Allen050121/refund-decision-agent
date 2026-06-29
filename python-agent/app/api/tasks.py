@@ -5,7 +5,7 @@
 import asyncio
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 
 from fastapi import APIRouter, HTTPException
@@ -15,6 +15,10 @@ from app.agent.state import AgentState, DecisionEnum
 from app.domain.models.task import Task, TaskStatus
 
 logger = logging.getLogger(__name__)
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 router = APIRouter()
 
@@ -155,7 +159,7 @@ async def _execute_task(task: Task) -> None:
     """
     try:
         task.status = TaskStatus.PROCESSING
-        task.started_at = datetime.utcnow()
+        task.started_at = utc_now()
 
         # 构建初始状态
         state = AgentState(
@@ -166,7 +170,7 @@ async def _execute_task(task: Task) -> None:
             trace_context={
                 "trace_id": task.trace_id or task.task_id,
                 "task_id": task.task_id,
-                "started_at": datetime.utcnow().isoformat(),
+                "started_at": utc_now().isoformat(),
             },
         )
 
@@ -193,7 +197,7 @@ async def _execute_task(task: Task) -> None:
 
         # 更新任务状态
         task.status = TaskStatus.COMPLETED
-        task.completed_at = datetime.utcnow()
+        task.completed_at = utc_now()
         task.result = result
 
         logger.info(f"任务处理完成 | task_id={task.task_id} | decision={result.get('decision')}")
@@ -202,7 +206,7 @@ async def _execute_task(task: Task) -> None:
         logger.error(f"任务处理失败 | task_id={task.task_id} | error={e}")
         task.status = TaskStatus.FAILED
         task.error_message = str(e)
-        task.completed_at = datetime.utcnow()
+        task.completed_at = utc_now()
 
 
 def get_task_store() -> Dict[str, Task]:

@@ -30,7 +30,7 @@ async def redis_client():
     yield client
     # 清理测试数据
     await client.delete(TEST_STREAM)
-    await client.close()
+    await client.aclose()
 
 
 @pytest_asyncio.fixture

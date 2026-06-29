@@ -4,13 +4,17 @@ import com.example.aftersale.application.service.RefundQueryService;
 import com.example.aftersale.domain.course.Course;
 import com.example.aftersale.domain.learning.LearningProgress;
 import com.example.aftersale.domain.order.Order;
+import com.example.aftersale.domain.refund.RefundEligibilityResult;
 import com.example.aftersale.interfaces.dto.CourseStatusResponse;
 import com.example.aftersale.interfaces.dto.LearningProgressResponse;
 import com.example.aftersale.interfaces.dto.OrderResponse;
+import com.example.aftersale.interfaces.dto.RefundEligibilityRequest;
+import com.example.aftersale.interfaces.dto.RefundEligibilityResponse;
 import com.example.aftersale.interfaces.dto.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -120,6 +124,41 @@ public class RefundQueryController {
                 .isAvailable(course.isAvailable())
                 .unavailableReason(course.getUnavailableReason())
                 .isPromotional(course.isPromotional())
+                .build();
+
+        log.info("   返回：{}", response);
+
+        return Result.success(response);
+    }
+
+    /**
+     * 检查退款资格
+     * 文档工具：check_eligibility(order_id, requester_user_id, reason_code)
+     */
+    @Operation(summary = "退款资格校验", description = "根据订单、用户和退款原因计算确定性退款资格")
+    @PostMapping("/refund/check-eligibility")
+    public Result<RefundEligibilityResponse> checkEligibility(
+            @Valid @RequestBody RefundEligibilityRequest request) {
+
+        log.info(" 检查退款资格 | orderId={} | requesterUserId={} | reasonCode={}",
+                request.getOrderId(), request.getRequesterUserId(), request.getReasonCode());
+
+        RefundEligibilityResult result = refundQueryService.checkEligibility(
+                request.getOrderId(),
+                request.getRequesterUserId(),
+                request.getReasonCode(),
+                0
+        );
+
+        RefundEligibilityResponse response = RefundEligibilityResponse.builder()
+                .eligible(result.isEligible())
+                .decisionCode(result.getDecisionCode())
+                .maxRefundAmount(result.getMaxRefundAmount().getCents())
+                .approvalRequired(result.isApprovalRequired())
+                .approvalReason(result.getApprovalReason())
+                .evidence(result.getEvidence())
+                .ruleCitation(result.getAppliedRule() != null ? result.getAppliedRule().citation() : null)
+                .riskLevel(result.getRiskLevel())
                 .build();
 
         log.info("   返回：{}", response);

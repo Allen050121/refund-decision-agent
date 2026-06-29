@@ -4,7 +4,7 @@
 """
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from app.agent.state import AgentState
@@ -16,6 +16,10 @@ from app.domain.models.task import Task, TaskStatus
 from app.domain.models.refund import RefundDecision, DecisionType
 
 logger = logging.getLogger(__name__)
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class ProcessTaskUseCase:
@@ -58,7 +62,7 @@ class ProcessTaskUseCase:
                 trace_context={
                     "trace_id": task.trace_id or task_id,
                     "task_id": task_id,
-                    "started_at": datetime.utcnow().isoformat(),
+                    "started_at": utc_now().isoformat(),
                 },
             )
 
@@ -74,7 +78,7 @@ class ProcessTaskUseCase:
             # 5. 持久化结果
             task.status = TaskStatus.COMPLETED
             task.result = decision.model_dump()
-            task.completed_at = datetime.utcnow()
+            task.completed_at = utc_now()
             await self.task_repository.save(task)
 
             # 6. 发布完成事件
@@ -89,7 +93,7 @@ class ProcessTaskUseCase:
             # 保存失败状态
             task.status = TaskStatus.FAILED
             task.error_message = str(e)
-            task.completed_at = datetime.utcnow()
+            task.completed_at = utc_now()
             await self.task_repository.save(task)
 
             # 发布错误事件
@@ -99,7 +103,7 @@ class ProcessTaskUseCase:
                     "type": "error",
                     "node": "workflow",
                     "error": str(e),
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": utc_now().isoformat(),
                 },
             )
 

@@ -7,7 +7,7 @@ Elasticsearch 规则检索实现
   - 返回 Top-K 规则与原文片段
 """
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 
 from elasticsearch import AsyncElasticsearch
@@ -16,6 +16,10 @@ from app.application.ports.retrieval_port import RetrievalPort
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class ElasticsearchRetriever(RetrievalPort):
@@ -59,15 +63,21 @@ class ElasticsearchRetriever(RetrievalPort):
         must_clauses: List[Dict[str, Any]] = []
         filter_clauses: List[Dict[str, Any]] = []
 
-        # BM25 文本检索
+        # BM25 文本检索。
+        # 当已有 scenario/reason_code 这类结构化上下文时，文本匹配只用于排序增强，
+        # 不作为硬性 must，避免中文标准分词导致明确场景规则被过滤掉。
+        text_query = None
         if query:
-            must_clauses.append({
+            text_query = {
                 "multi_match": {
                     "query": query,
                     "fields": ["content", "title", "scenario"],
                     "type": "best_fields",
                 }
-            })
+            }
+
+        if text_query and not (scenario or reason_code):
+            must_clauses.append(text_query)
 
         # 文档 3.3: 元数据过滤 - 场景匹配（使用 keyword 子字段）
         if scenario:
@@ -77,7 +87,7 @@ class ElasticsearchRetriever(RetrievalPort):
             filter_clauses.append({"term": {"reasonCode.keyword": reason_code}})
 
         # 文档 3.3: 只保留当前生效的规则
-        now = datetime.utcnow().isoformat()
+        now = utc_now().isoformat()
         filter_clauses.append({
             "bool": {
                 "should": [
@@ -97,16 +107,20 @@ class ElasticsearchRetriever(RetrievalPort):
             }
         })
 
+        bool_query: Dict[str, Any] = {
+            "must": must_clauses if must_clauses else [{"match_all": {}}],
+            "filter": filter_clauses,
+        }
+        if text_query and (scenario or reason_code):
+            bool_query["should"] = [text_query]
+
         body: Dict[str, Any] = {
             "size": top_k,
             "query": {
-                "bool": {
-                    "must": must_clauses if must_clauses else [{"match_all": {}}],
-                    "filter": filter_clauses,
-                }
+                "bool": bool_query
             },
             "_source": ["ruleId", "version", "content", "scenario", "riskLevel",
-                        "effectiveFrom", "effectiveTo", "reasonCode"],
+                        "effectiveFrom", "effectiveTo", "reasonCode", "title"],
         }
 
         logger.info(f"检索规则 | query='{query[:50]}...' | scenario={scenario} | top_k={top_k}")

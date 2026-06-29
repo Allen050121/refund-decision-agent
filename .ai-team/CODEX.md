@@ -40,13 +40,29 @@ Codex should:
 - Respect `.ai-team/memory/human-lead.md`.
 - Inspect `.ai-team/tasks/` before deciding the next action.
 - Use `.ai-team/state/tasks.json` and `.ai-team/state/runs.json` to understand current task evidence.
-- Use `.ai-team/state/collaboration.json` to coordinate with Claude when the same project is shared.
-- Record handoffs with `.ai-team/scripts/Update-AiTeamCollaboration.ps1` before stopping mid-task.
+- Use `.ai-team/state/collaboration.json` to avoid overlapping active Claude or Codex sessions.
 - Use `.ai-team/memory/` for project context and lessons.
 - Use `.ai-team/prompts/` internally for the right role.
 - Use `.ai-team/checklists/` as gates.
 - Use `.ai-team/policies/command-policy.md` before risky commands.
 - Ask questions only at clarification or approval boundaries.
+
+## Shared Codex/Claude Projects
+
+Before editing in a project that may also be open in Claude Code, run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .ai-team/scripts/Get-AiTeamStatus.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .ai-team/scripts/Update-AiTeamCollaboration.ps1 -Action status -Client codex
+```
+
+When taking an implementation, review, or integration task, claim it:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .ai-team/scripts/Update-AiTeamCollaboration.ps1 -Action start -Client codex -TaskId <task-id> -Role <role>
+```
+
+When handing work to Claude or another Codex session, record a compact handoff or completion with `.ai-team/scripts/Update-AiTeamCollaboration.ps1`.
 
 ## User Responsibilities
 

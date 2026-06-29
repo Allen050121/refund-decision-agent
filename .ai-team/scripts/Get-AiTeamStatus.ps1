@@ -40,31 +40,31 @@ if (Test-Path -LiteralPath $runsPath) {
     }
 }
 
+Write-Host "Collaboration:"
 if (Test-Path -LiteralPath $collaborationPath) {
     try {
-        $collaborationState = Get-Content -LiteralPath $collaborationPath -Encoding UTF8 -Raw | ConvertFrom-Json
-        Write-Host "Collaboration:"
-        if ($collaborationState.active -and @($collaborationState.active).Count -gt 0) {
-            foreach ($session in @($collaborationState.active)) {
-                Write-Host ("- active {0}: task={1}; client={2}; role={3}" -f $session.session_id, $session.task_id, $session.client, $session.role)
-            }
-        }
-        else {
+        $collaboration = Get-Content -LiteralPath $collaborationPath -Encoding UTF8 -Raw | ConvertFrom-Json
+        $activeSessions = @($collaboration.active)
+        if ($activeSessions.Count -eq 0) {
             Write-Host "- no active Codex/Claude sessions"
         }
-        if ($collaborationState.handoffs -and @($collaborationState.handoffs).Count -gt 0) {
-            $latestHandoff = @($collaborationState.handoffs) |
-                Sort-Object @{ Expression = { $_.created_at }; Descending = $true } |
-                Select-Object -First 1
-            Write-Host ("- latest handoff: task={0}; from={1}; next={2}" -f $latestHandoff.task_id, $latestHandoff.client, $latestHandoff.next_action)
+        else {
+            foreach ($session in $activeSessions) {
+                Write-Host ("- active: client={0}; task={1}; role={2}; started={3}" -f $session.client, $session.task_id, $session.role, $session.started_at)
+            }
         }
-        Write-Host ""
+        if ($collaboration.updatedAt) {
+            Write-Host ("- updated: {0}" -f $collaboration.updatedAt)
+        }
     }
     catch {
-        Write-Host "Collaboration state exists but could not be parsed: $collaborationPath"
-        Write-Host ""
+        Write-Host "- collaboration state exists but could not be parsed: $collaborationPath"
     }
 }
+else {
+    Write-Host "- collaboration state not initialized"
+}
+Write-Host ""
 
 function Get-LatestRunForTask {
     param(
@@ -77,6 +77,13 @@ function Get-LatestRunForTask {
         Where-Object { $_.task_id -eq $TaskId } |
         Sort-Object @{ Expression = { if ($_.finished_at) { $_.finished_at } else { $_.started_at } }; Descending = $true } |
         Select-Object -First 1
+}
+
+function Test-TaskDoneStatus {
+    param([string]$Status)
+
+    $normalized = "$Status".ToLowerInvariant()
+    return $normalized -in @("done", "completed")
 }
 
 function Get-TaskById {
@@ -101,7 +108,7 @@ function Test-DependenciesDone {
     foreach ($dependencyId in $dependencies) {
         $dependency = Get-TaskById $Tasks $dependencyId
         if (-not $dependency) { return $false }
-        if ("$($dependency.status)".ToLowerInvariant() -ne "done") { return $false }
+        if (-not (Test-TaskDoneStatus "$($dependency.status)")) { return $false }
     }
     return $true
 }
@@ -118,7 +125,7 @@ function Get-BlockedDependencies {
         if (-not $dependency) {
             $blocked += "$dependencyId (missing)"
         }
-        elseif ("$($dependency.status)".ToLowerInvariant() -ne "done") {
+        elseif (-not (Test-TaskDoneStatus "$($dependency.status)")) {
             $blocked += "$dependencyId [$($dependency.status)]"
         }
     }
@@ -169,7 +176,7 @@ function Get-RecommendedAction {
 
     foreach ($task in $Tasks) {
         $status = "$($task.status)".ToLowerInvariant()
-        if ($status -ne "done") {
+        if (-not (Test-TaskDoneStatus $status)) {
             $blocked = Get-BlockedDependencies $Tasks $task
             return [ordered]@{
                 task_id = $task.task_id
@@ -190,11 +197,7 @@ if ($stateTasks.Count -gt 0) {
     Write-Host "Tasks:"
     foreach ($task in $stateTasks) {
         Write-Host ("- {0} [{1}] {2}" -f $task.task_id, $task.status, $task.title)
-        if ($task.task_type -or $task.delivery_stage) {
-            Write-Host ("  Layer: type={0}; stage={1}" -f $task.task_type, $task.delivery_stage)
-        }
         if ($task.work_mode) { Write-Host ("  Work mode: {0}" -f $task.work_mode) }
-        if ($task.workflow_mode) { Write-Host ("  Workflow mode: {0}" -f $task.workflow_mode) }
         if ($task.business) { Write-Host ("  Business: {0}" -f $task.business) }
         if ($task.dependencies -and @($task.dependencies).Count -gt 0) {
             Write-Host ("  Dependencies: {0}" -f (@($task.dependencies) -join ", "))
@@ -266,7 +269,7 @@ foreach ($file in $taskFiles) {
         $status = $Matches[1].Trim().ToLowerInvariant()
     }
 
-    if ($status -ne "done") {
+    if (-not (Test-TaskDoneStatus $status)) {
         $recommendation = [ordered]@{
             task_id = $file.BaseName
             action = "inspect"

@@ -1,7 +1,7 @@
 ---
 title: "阶段1: Java确定性业务底座 - 领域模型与退款资格校验"
 task_id: "TASK-001"
-status: "pending"
+status: "completed"
 owner: "backend-engineer"
 task_type: "implementation"
 delivery_stage: "stack"
@@ -10,9 +10,9 @@ work_mode: "sequential"
 workflow_mode: "standard"
 created: "2026-06-23"
 dependencies:
-verification_status: not_run
-last_run_id:
-last_result:
+verification_status: passed
+last_run_id: TASK-001-reviewer-20260629003923
+last_result: java_mvn_test_build_success_no_test_sources
 blocked_reason:
 branch:
 github_issue:
@@ -33,14 +33,14 @@ tags:
 - Owner: `backend-engineer`
 - Task Type: `implementation`
 - Delivery Stage: `stack`
-- Status: `pending`
+- Status: `completed`
 - Mode: `standard`
 - Work Mode: `sequential`
 - Workflow Mode: `standard`
 - Dependencies: 无
-- Verification Status: `not_run`
-- Last Run:
-- Last Result:
+- Verification Status: `passed`
+- Last Run: `TASK-001-reviewer-20260629003923`
+- Last Result: `java_mvn_test_build_success_no_test_sources`
 - Blocked Reason:
 - Branch:
 - GitHub Issue:

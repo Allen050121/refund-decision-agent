@@ -1,10 +1,293 @@
-{
-  "version": 1,
-  "runs": [],
-  "updatedAt": null,
-  "notes": [
-    "This file is a compact execution ledger for task, review, and integration runs.",
-    "Store summaries and verification results only. Do not store full chat logs.",
-    "Use .ai-team/scripts/Update-AiTeamRun.ps1 to append run evidence."
-  ]
+﻿{
+    "version":  1,
+    "updatedAt":  "2026-06-29T10:42:17.9729834+08:00",
+    "runs":  [
+                 {
+                     "run_id":  "TASK-006-reviewer-20260628174322",
+                     "task_id":  "TASK-006",
+                     "role":  "reviewer",
+                     "status":  "passed",
+                     "started_at":  "2026-06-28T17:43:22.6391130+08:00",
+                     "finished_at":  "2026-06-28T17:43:22.6391130+08:00",
+                     "changed_files":  [
+                                           "python-agent/app/config.py",
+                                           "python-agent/app/infrastructure/llm/client.py",
+                                           "python-agent/app/tests/test_llm_client.py",
+                                           "python-agent/.env.example",
+                                           "PROJECT_STATUS.md",
+                                           "README.md"
+                                       ],
+                     "verification":  [
+                                          "python-agent: python -m compileall app passed",
+                                          "java-service: mvn test build success, no Java test sources",
+                                          "pytest not rerun: Codex shell is not in configured conda environment"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Human Lead to run pytest in configured conda env",
+                                       "Human Lead to start services and verify Freemodel real LLM call"
+                                   ]
+                 },
+                 {
+                     "run_id":  "TASK-006-reviewer-20260628175501",
+                     "task_id":  "TASK-006",
+                     "role":  "reviewer",
+                     "status":  "passed",
+                     "started_at":  "2026-06-28T17:55:01.7824288+08:00",
+                     "finished_at":  "2026-06-28T17:55:01.7824288+08:00",
+                     "changed_files":  [
+                                           "python-agent/app/infrastructure/llm/client.py",
+                                           "python-agent/app/tests/test_llm_client.py",
+                                           "java-service/src/main/java/com/example/aftersale/interfaces/controller/RefundQueryController.java"
+                                       ],
+                     "verification":  [
+                                          "python-agent conda env: python -m pytest app/tests -q =\u003e 87 passed",
+                                          "LLM /models on cc.freemodel.dev returned 200 and included claude-sonnet-4-6",
+                                          "LLM chat/completions on cc.freemodel.dev returned 503 Service Unavailable",
+                                          "LLM messages on cc.freemodel.dev returned 503 Service Unavailable",
+                                          "api.freemodel.dev/v1 /models returned 200 for OpenAI endpoint models, chat/completions returned 503",
+                                          "java-service: mvn test build success, no Java test sources",
+                                          "java localhost:8080 SQL seed query endpoints verified for order, learning progress, course status",
+                                          "java temporary localhost:8081 with new check-eligibility endpoint started, request logs show expected eligibility responses, then stopped"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Restart Java service on 8080 to use new POST /api/refund/check-eligibility endpoint",
+                                       "Freemodel inference backend currently returns 503 despite valid /models auth; retry later or choose a model/endpoint with available inference",
+                                       "Database seed Chinese text appears mojibake in current DB; re-import seed data with UTF-8 client encoding if display quality matters"
+                                   ]
+                 },
+                 {
+                     "run_id":  "TASK-006-reviewer-20260628234333",
+                     "task_id":  "TASK-006",
+                     "role":  "reviewer",
+                     "status":  "passed",
+                     "started_at":  "2026-06-28T23:43:33.1547054+08:00",
+                     "finished_at":  "2026-06-28T23:43:33.1547054+08:00",
+                     "changed_files":  [
+                                           "python-agent/.env (gitignored local config, secret not committed)",
+                                           "PROJECT_STATUS.md"
+                                       ],
+                     "verification":  [
+                                          "sui-xiang /models returned 200 with GPT model list",
+                                          "sui-xiang chat/completions gpt-5.4-mini returned 200 and content ok",
+                                          "sui-xiang chat/completions gpt-5.4 returned 200 and content ok",
+                                          "project OpenAILLMClient using .env returned LLM_OK with gpt-5.4-mini",
+                                          "python-agent conda env: python -m pytest app/tests -q =\u003e 87 passed"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Use gpt-5.4-mini for local demo unless a better gateway/model is chosen",
+                                       "Do not commit python-agent/.env"
+                                   ]
+                 },
+                 {
+                     "run_id":  "TASK-006-reviewer-20260628235532",
+                     "task_id":  "TASK-006",
+                     "role":  "reviewer",
+                     "status":  "passed",
+                     "started_at":  "2026-06-28T23:55:32.6283652+08:00",
+                     "finished_at":  "2026-06-28T23:55:32.6283652+08:00",
+                     "changed_files":  [
+                                           "python-agent/app/agent/nodes/__init__.py",
+                                           "python-agent/app/tests/test_nodes.py"
+                                       ],
+                     "verification":  [
+                                          "python-agent: pytest app/tests/test_nodes.py app/tests/test_graph.py -q =\u003e 28 passed",
+                                          "python-agent: pytest app/tests -q =\u003e 88 passed",
+                                          "runtime endpoint still returned GENERAL before Python Agent restart, indicating running process has not loaded latest classify correction"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Restart Python Agent to load deterministic reason_code correction",
+                                       "After restart rerun three demo tasks and record concrete reason_code values"
+                                   ]
+                 },
+                 {
+                     "run_id":  "TASK-006-reviewer-20260629000226",
+                     "task_id":  "TASK-006",
+                     "role":  "reviewer",
+                     "status":  "passed",
+                     "started_at":  "2026-06-29T00:02:26.3476615+08:00",
+                     "finished_at":  "2026-06-29T00:02:26.3476615+08:00",
+                     "changed_files":  [
+                                           "python-agent/app/agent/nodes/__init__.py",
+                                           "python-agent/app/infrastructure/retrieval/elasticsearch_retriever.py",
+                                           "python-agent/app/tests/test_nodes.py"
+                                       ],
+                     "verification":  [
+                                          "reviewed product/development doc sections on MVP positioning, Agent workflow, RAG, deterministic Java eligibility, memory/context design, evaluation and interview questions",
+                                          "python-agent: pytest app/tests -q =\u003e 88 passed",
+                                          "runtime E2E course unavailable =\u003e reason_code COURSE_UNAVAILABLE, citation REFUND-2026-001",
+                                          "runtime E2E no reason refund =\u003e reason_code NO_REASON, citation REFUND-2026-003"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Fix DB seed mojibake before recording/demo",
+                                       "Add README/doc section that summarizes Agent orchestration and context engineering for interview use"
+                                   ]
+                 },
+                 {
+                     "run_id":  "TASK-001-reviewer-20260629003923",
+                     "task_id":  "TASK-001",
+                     "role":  "reviewer",
+                     "status":  "passed",
+                     "started_at":  "2026-06-29T00:39:23.6875199+08:00",
+                     "finished_at":  "2026-06-29T00:39:23.6875199+08:00",
+                     "changed_files":  [
+
+                                       ],
+                     "verification":  [
+                                          "java-service: mvn test =\u003e BUILD SUCCESS, no Java test sources; Python baseline also verified separately in project-polish"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-007-engineering-polish-executor-20260629004224",
+                     "task_id":  "task-007-engineering-polish",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-06-29T00:42:24.5002541+08:00",
+                     "finished_at":  "2026-06-29T00:42:24.5002541+08:00",
+                     "changed_files":  [
+
+                                       ],
+                     "verification":  [
+                                          "java-service: mvn test =\u003e BUILD SUCCESS; python-agent: conda python -m pytest =\u003e 88 passed, no warnings; AI Team memory and repo map updated"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-008-test-smoke-readiness-executor-20260629094041",
+                     "task_id":  "task-008-test-smoke-readiness",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-06-29T09:44:08.0053816+08:00",
+                     "finished_at":  "2026-06-29T09:44:08.0053816+08:00",
+                     "changed_files":  [
+                                           "java-service/src/test/java/com/example/aftersale/domain/refund/RefundEligibilityServiceTest.java,python-agent/data/demo_cases.json,scripts/smoke_demo.py,python-agent/app/agent/nodes/__init__.py,python-agent/app/tests/test_nodes.py,python-agent/app/tests/test_graph.py,README.md,PROJECT_STATUS.md"
+                                       ],
+                     "verification":  [
+                                          "scripts/smoke_demo.py: 6 demo cases passed,python pytest: 91 passed,java mvn test: 6 tests passed, build success"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Optional minimal demo UI after startup flow is stable"
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-009-demo-report-executor-20260629095323",
+                     "task_id":  "task-009-demo-report",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-06-29T09:54:50.5718857+08:00",
+                     "finished_at":  "2026-06-29T09:54:50.5718857+08:00",
+                     "changed_files":  [
+                                           "scripts/smoke_demo.py,docs/demo-report.html,README.md,PROJECT_STATUS.md"
+                                       ],
+                     "verification":  [
+                                          "smoke_demo.py --html: generated docs/demo-report.html and 6 demo cases passed,python pytest: 91 passed,java mvn test: 6 tests passed, build success"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Optional API-backed demo page after local startup flow is stable"
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-010-service-smoke-executor-20260629101934",
+                     "task_id":  "task-010-service-smoke",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-06-29T10:21:21.0106165+08:00",
+                     "finished_at":  "2026-06-29T10:21:21.0106165+08:00",
+                     "changed_files":  [
+                                           "scripts/service_smoke.py,README.md,PROJECT_STATUS.md"
+                                       ],
+                     "verification":  [
+                                          "service_smoke.py compiles and help output works,service_smoke.py --skip-python --timeout 0.5: services-not-running failure path is clear,smoke_demo.py --html: 6 demo cases passed,python pytest: 91 passed,java mvn test: 6 tests passed, build success"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Run service_smoke.py after user starts Java and Python services"
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-011-real-llm-agent-smoke-executor-20260629103233",
+                     "task_id":  "task-011-real-llm-agent-smoke",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-06-29T10:33:23.0344971+08:00",
+                     "finished_at":  "2026-06-29T10:33:23.0344971+08:00",
+                     "changed_files":  [
+                                           "scripts/real_llm_agent_smoke.py,README.md,PROJECT_STATUS.md"
+                                       ],
+                     "verification":  [
+                                          "real_llm_agent_smoke.py --timeout 45: 4 real LLM cases passed with gpt-5.4-mini,service_smoke.py: 7 service checks passed,smoke_demo.py --html: 6 demo cases passed,python pytest: 91 passed,java mvn test: 6 tests passed, build success"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Build minimal frontend demo console using real LLM smoke evidence"
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-012-demo-console-executor-20260629104130",
+                     "task_id":  "task-012-demo-console",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-06-29T10:42:17.9729834+08:00",
+                     "finished_at":  "2026-06-29T10:42:17.9729834+08:00",
+                     "changed_files":  [
+                                           "python-agent/app/api/demo.py,python-agent/app/main.py,python-agent/app/tests/test_tasks_api.py,README.md,PROJECT_STATUS.md"
+                                       ],
+                     "verification":  [
+                                          "/demo ASGI route test passed,python pytest: 92 passed,java mvn test: 6 tests passed, build success,real_llm_agent_smoke.py --timeout 45: 4 real LLM cases passed,service_smoke.py: 7 service checks passed"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Restart Python service so /demo is available in the running process"
+                                   ]
+                 }
+             ]
 }

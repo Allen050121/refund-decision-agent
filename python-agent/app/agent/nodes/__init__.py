@@ -67,6 +67,16 @@ async def classify_and_extract(state: AgentState) -> Dict[str, Any]:
             reason_code = ReasonCodeEnum(data.get("reason_code", "GENERAL"))
             order_id = data.get("order_id") or state.order_id
 
+            # LLM 负责语义理解，但明确业务信号用确定性规则校正。
+            # 例如“课程打不开”“无理由退款”不应被模型泛化成 GENERAL。
+            rule_result = _rule_based_classify(ticket_content, order_id)
+            rule_reason = rule_result.get("reason_code")
+            if rule_reason and rule_reason != ReasonCodeEnum.GENERAL:
+                reason_code = rule_reason
+            if rule_result.get("intent") == IntentEnum.REFUND_REQUEST:
+                intent = IntentEnum.REFUND_REQUEST
+            order_id = rule_result.get("order_id") or order_id
+
             result = {
                 "intent": intent,
                 "reason_code": reason_code,
@@ -409,6 +419,19 @@ async def risk_gate(state: AgentState) -> Dict[str, Any]:
     risk_hints = state.risk_hints.copy()
     errors = state.errors.copy()
     decision = state.decision or DecisionEnum.NEED_MORE_INFORMATION
+
+    if state.intent == IntentEnum.OTHER:
+        return {
+            "decision": DecisionEnum.NEED_MORE_INFORMATION,
+            "risk_hints": risk_hints + ["非退款请求，转普通客服或补充售后诉求"],
+        }
+
+    if state.missing_fields:
+        missing = ", ".join(state.missing_fields)
+        return {
+            "decision": DecisionEnum.NEED_MORE_INFORMATION,
+            "risk_hints": risk_hints + [f"缺少必要字段: {missing}"],
+        }
 
     # 检查是否有权限错误 -> 立即终止
     permission_errors = [e for e in errors if "PERMISSION_DENIED" in e]

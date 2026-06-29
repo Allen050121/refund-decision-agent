@@ -81,6 +81,33 @@ async def test_classify_no_reason():
 
 
 @pytest.mark.asyncio
+async def test_classify_corrects_llm_general_with_deterministic_signal():
+    """测试 LLM 泛化为 GENERAL 时，明确业务信号会被规则校正"""
+    fake_llm = FakeLLMClient(
+        responses=[
+            {
+                "content": {
+                    "intent": "REFUND_REQUEST",
+                    "reason_code": "GENERAL",
+                    "confidence": 0.6,
+                }
+            }
+        ]
+    )
+    set_ports(llm=fake_llm, retrieval=FakeRetriever())
+
+    state = AgentState(
+        task_id="T-004-A",
+        user_id="U1004",
+        ticket_content="课程一直打不开，视频故障，申请退款",
+    )
+    result = await classify_and_extract(state)
+
+    assert result["intent"] == IntentEnum.REFUND_REQUEST
+    assert result["reason_code"] == ReasonCodeEnum.COURSE_UNAVAILABLE
+
+
+@pytest.mark.asyncio
 async def test_classify_empty_ticket():
     """测试空工单内容"""
     state = AgentState(task_id="T-005", ticket_content="")
@@ -293,6 +320,34 @@ async def test_risk_gate_conflicting_rules():
     )
     result = await risk_gate(state)
     assert result["decision"] == DecisionEnum.WAIT_FOR_APPROVAL
+
+
+@pytest.mark.asyncio
+async def test_risk_gate_missing_fields_need_more_information():
+    state = AgentState(
+        task_id="T-005",
+        intent=IntentEnum.REFUND_REQUEST,
+        decision=DecisionEnum.REFUND_RECOMMENDED,
+        missing_fields=["order_id"],
+        risk_hints=[],
+        errors=[],
+    )
+    result = await risk_gate(state)
+    assert result["decision"] == DecisionEnum.NEED_MORE_INFORMATION
+    assert any("order_id" in hint for hint in result["risk_hints"])
+
+
+@pytest.mark.asyncio
+async def test_risk_gate_other_intent_need_more_information():
+    state = AgentState(
+        task_id="T-006",
+        intent=IntentEnum.OTHER,
+        decision=DecisionEnum.REFUND_RECOMMENDED,
+        risk_hints=[],
+        errors=[],
+    )
+    result = await risk_gate(state)
+    assert result["decision"] == DecisionEnum.NEED_MORE_INFORMATION
 
 
 @pytest.mark.asyncio

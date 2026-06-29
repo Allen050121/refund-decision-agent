@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>售后退款决策 Agent Demo 报告</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172026;
+      --muted: #60707d;
+      --line: #d8e0e6;
+      --panel: #f7f9fb;
+      --ok: #0f7a4f;
+      --ok-bg: #e4f6ed;
+      --bad: #b42318;
+      --bad-bg: #fde7e5;
+      --warn: #996500;
+      --warn-bg: #fff3cf;
+      --info: #1456a0;
+      --info-bg: #e8f1ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+    header.page {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 18px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(88px, 1fr));
+      gap: 10px;
+      min-width: 300px;
+    }
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--panel);
+    }
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .metric strong {
+      font-size: 24px;
+    }
+    .band {
+      margin-top: 22px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+    }
+    .decision-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 0;
+      margin: 12px 0 0;
+      list-style: none;
+    }
+    .decision-list li {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--panel);
+    }
+    td span {
+      display: block;
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 12px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .ok { color: var(--ok); background: var(--ok-bg); }
+    .bad { color: var(--bad); background: var(--bad-bg); }
+    .warn { color: var(--warn); background: var(--warn-bg); }
+    .info { color: var(--info); background: var(--info-bg); }
+    .muted { color: var(--muted); }
+    .case {
+      border-top: 1px solid var(--line);
+      padding: 18px 0;
+    }
+    .case header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+    }
+    .case h2 {
+      margin: 4px 0 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+    .case-id {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .case p {
+      margin: 12px 0;
+      line-height: 1.7;
+    }
+    dl {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0;
+    }
+    dl div {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      min-width: 0;
+    }
+    dt {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+    footer {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    @media (max-width: 820px) {
+      header.page {
+        grid-template-columns: 1fr;
+      }
+      .summary {
+        min-width: 0;
+      }
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+      dl {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="page">
+      <div>
+        <h1>售后退款决策 Agent Demo 报告</h1>
+        <p class="subtitle">生成时间：2026-06-29T10:32:27；数据源：D:\yangjw\workspace\refund-decision-agent\python-agent\data\demo_cases.json</p>
+      </div>
+      <div class="summary">
+        <div class="metric"><span>用例</span><strong>6</strong></div>
+        <div class="metric"><span>通过</span><strong>6</strong></div>
+        <div class="metric"><span>失败</span><strong>0</strong></div>
+      </div>
+    </header>
+
+    <section class="band">
+      <h2>决策分布</h2>
+      <ul class="decision-list"><li><span>NEED_MORE_INFORMATION</span><strong>2</strong></li><li><span>REFUND_RECOMMENDED</span><strong>2</strong></li><li><span>REFUND_REJECTED</span><strong>1</strong></li><li><span>WAIT_FOR_APPROVAL</span><strong>1</strong></li></ul>
+    </section>
+
+    <section class="band">
+      <h2>冒烟结果</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Case</th>
+            <th>Intent</th>
+            <th>Reason</th>
+            <th>Decision</th>
+            <th>Rules</th>
+            <th>Risk</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+            <tr>
+              <td><strong>DEMO-001</strong><span>课程无法观看，建议退款</span></td>
+              <td>REFUND_REQUEST</td>
+              <td>COURSE_UNAVAILABLE</td>
+              <td><span class="badge ok">REFUND_RECOMMENDED</span></td>
+              <td>REFUND-2026-001</td>
+              <td><span class="muted">-</span></td>
+              <td><span class="badge ok">PASS</span></td>
+            </tr>
+            
+            <tr>
+              <td><strong>DEMO-002</strong><span>重复购买，建议退款</span></td>
+              <td>REFUND_REQUEST</td>
+              <td>DUPLICATE_PURCHASE</td>
+              <td><span class="badge ok">REFUND_RECOMMENDED</span></td>
+              <td>REFUND-2026-001, REFUND-2026-002</td>
+              <td><span class="muted">-</span></td>
+              <td><span class="badge ok">PASS</span></td>
+            </tr>
+            
+            <tr>
+              <td><strong>DEMO-003</strong><span>无理由退款，转人工审批</span></td>
+              <td>REFUND_REQUEST</td>
+              <td>NO_REASON</td>
+              <td><span class="badge warn">WAIT_FOR_APPROVAL</span></td>
+              <td>REFUND-2026-001, REFUND-2026-005</td>
+              <td>需人工审批</td>
+              <td><span class="badge ok">PASS</span></td>
+            </tr>
+            
+            <tr>
+              <td><strong>DEMO-004</strong><span>超过退款窗口，拒绝退款</span></td>
+              <td>REFUND_REQUEST</td>
+              <td>EXPIRED_REFUND_WINDOW</td>
+              <td><span class="badge bad">REFUND_REJECTED</span></td>
+              <td>REFUND-2026-001, REFUND-2026-004</td>
+              <td><span class="muted">-</span></td>
+              <td><span class="badge ok">PASS</span></td>
+            </tr>
+            
+            <tr>
+              <td><strong>DEMO-005</strong><span>缺少订单号，要求补充信息</span></td>
+              <td>REFUND_REQUEST</td>
+              <td>COURSE_UNAVAILABLE</td>
+              <td><span class="badge info">NEED_MORE_INFORMATION</span></td>
+              <td>REFUND-2026-001</td>
+              <td>缺少必要字段: order_id</td>
+              <td><span class="badge ok">PASS</span></td>
+            </tr>
+            
+            <tr>
+              <td><strong>DEMO-006</strong><span>非退款咨询，不进入退款链路</span></td>
+              <td>OTHER</td>
+              <td>GENERAL</td>
+              <td><span class="badge info">NEED_MORE_INFORMATION</span></td>
+              <td><span class="muted">-</span></td>
+              <td>非退款请求，转普通客服或补充售后诉求</td>
+              <td><span class="badge ok">PASS</span></td>
+            </tr>
+            
+        </tbody>
+      </table>
+    </section>
+
+    <section class="band">
+      <h2>用例详情</h2>
+      
+            <section class="case">
+              <header>
+                <div>
+                  <span class="case-id">DEMO-001</span>
+                  <h2>课程无法观看，建议退款</h2>
+                </div>
+                <span class="badge ok">PASS</span>
+              </header>
+              <p>React 前端课程一直打不开，视频服务故障，订单号 O20260622003，想退款</p>
+              <dl>
+                <div><dt>用户</dt><dd>U1002</dd></div>
+                <div><dt>订单</dt><dd>O20260622003</dd></div>
+                <div><dt>意图</dt><dd>REFUND_REQUEST</dd></div>
+                <div><dt>原因</dt><dd>COURSE_UNAVAILABLE</dd></div>
+                <div><dt>决策</dt><dd>REFUND_RECOMMENDED</dd></div>
+                <div><dt>规则</dt><dd>REFUND-2026-001</dd></div>
+                <div><dt>证据</dt><dd>LOW_LEARNING_PROGRESS, ORDER_PAID, COURSE_UNAVAILABLE</dd></div>
+                <div><dt>风险</dt><dd><span class="muted">-</span></dd></div>
+              </dl>
+            </section>
+            
+            <section class="case">
+              <header>
+                <div>
+                  <span class="case-id">DEMO-002</span>
+                  <h2>重复购买，建议退款</h2>
+                </div>
+                <span class="badge ok">PASS</span>
+              </header>
+              <p>我不小心买重了同一门 Java 课程，想退掉重复购买的订单 O20260622005</p>
+              <dl>
+                <div><dt>用户</dt><dd>U1002</dd></div>
+                <div><dt>订单</dt><dd>O20260622005</dd></div>
+                <div><dt>意图</dt><dd>REFUND_REQUEST</dd></div>
+                <div><dt>原因</dt><dd>DUPLICATE_PURCHASE</dd></div>
+                <div><dt>决策</dt><dd>REFUND_RECOMMENDED</dd></div>
+                <div><dt>规则</dt><dd>REFUND-2026-001, REFUND-2026-002</dd></div>
+                <div><dt>证据</dt><dd>NO_LEARNING_ACTIVITY, ORDER_PAID</dd></div>
+                <div><dt>风险</dt><dd><span class="muted">-</span></dd></div>
+              </dl>
+            </section>
+            
+            <section class="case">
+              <header>
+                <div>
+                  <span class="case-id">DEMO-003</span>
+                  <h2>无理由退款，转人工审批</h2>
+                </div>
+                <span class="badge ok">PASS</span>
+              </header>
+              <p>刚买的课程还没开始学，但我不想学了，申请无理由退款，订单 O20260622001</p>
+              <dl>
+                <div><dt>用户</dt><dd>U1001</dd></div>
+                <div><dt>订单</dt><dd>O20260622001</dd></div>
+                <div><dt>意图</dt><dd>REFUND_REQUEST</dd></div>
+                <div><dt>原因</dt><dd>NO_REASON</dd></div>
+                <div><dt>决策</dt><dd>WAIT_FOR_APPROVAL</dd></div>
+                <div><dt>规则</dt><dd>REFUND-2026-001, REFUND-2026-005</dd></div>
+                <div><dt>证据</dt><dd>NO_LEARNING_ACTIVITY, ORDER_PAID</dd></div>
+                <div><dt>风险</dt><dd>需人工审批</dd></div>
+              </dl>
+            </section>
+            
+            <section class="case">
+              <header>
+                <div>
+                  <span class="case-id">DEMO-004</span>
+                  <h2>超过退款窗口，拒绝退款</h2>
+                </div>
+                <span class="badge ok">PASS</span>
+              </header>
+              <p>这个订单已经超过 30 天了，现在还想退款，订单 O20260622008</p>
+              <dl>
+                <div><dt>用户</dt><dd>U1001</dd></div>
+                <div><dt>订单</dt><dd>O20260622008</dd></div>
+                <div><dt>意图</dt><dd>REFUND_REQUEST</dd></div>
+                <div><dt>原因</dt><dd>EXPIRED_REFUND_WINDOW</dd></div>
+                <div><dt>决策</dt><dd>REFUND_REJECTED</dd></div>
+                <div><dt>规则</dt><dd>REFUND-2026-001, REFUND-2026-004</dd></div>
+                <div><dt>证据</dt><dd>LOW_LEARNING_PROGRESS, ORDER_PAID</dd></div>
+                <div><dt>风险</dt><dd><span class="muted">-</span></dd></div>
+              </dl>
+            </section>
+            
+            <section class="case">
+              <header>
+                <div>
+                  <span class="case-id">DEMO-005</span>
+                  <h2>缺少订单号，要求补充信息</h2>
+                </div>
+                <span class="badge ok">PASS</span>
+              </header>
+              <p>我买的课程打不开，想退款</p>
+              <dl>
+                <div><dt>用户</dt><dd>U1001</dd></div>
+                <div><dt>订单</dt><dd>-</dd></div>
+                <div><dt>意图</dt><dd>REFUND_REQUEST</dd></div>
+                <div><dt>原因</dt><dd>COURSE_UNAVAILABLE</dd></div>
+                <div><dt>决策</dt><dd>NEED_MORE_INFORMATION</dd></div>
+                <div><dt>规则</dt><dd>REFUND-2026-001</dd></div>
+                <div><dt>证据</dt><dd><span class="muted">-</span></dd></div>
+                <div><dt>风险</dt><dd>缺少必要字段: order_id</dd></div>
+              </dl>
+            </section>
+            
+            <section class="case">
+              <header>
+                <div>
+                  <span class="case-id">DEMO-006</span>
+                  <h2>非退款咨询，不进入退款链路</h2>
+                </div>
+                <span class="badge ok">PASS</span>
+              </header>
+              <p>我想咨询一下 Java 课程大纲和上课时间</p>
+              <dl>
+                <div><dt>用户</dt><dd>U1001</dd></div>
+                <div><dt>订单</dt><dd>-</dd></div>
+                <div><dt>意图</dt><dd>OTHER</dd></div>
+                <div><dt>原因</dt><dd>GENERAL</dd></div>
+                <div><dt>决策</dt><dd>NEED_MORE_INFORMATION</dd></div>
+                <div><dt>规则</dt><dd><span class="muted">-</span></dd></div>
+                <div><dt>证据</dt><dd><span class="muted">-</span></dd></div>
+                <div><dt>风险</dt><dd>非退款请求，转普通客服或补充售后诉求</dd></div>
+              </dl>
+            </section>
+            
+    </section>
+
+    <footer>
+      Offline smoke report generated by scripts/smoke_demo.py. No Java, Redis, Elasticsearch, or real model gateway was required.
+    </footer>
+  </main>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 > 面向在线教育场景的售后退款决策 Agent | RAG + Tool Calling + Human-in-the-loop
 
-[![Tests](https://img.shields.io/badge/tests-85%20passed-green)]()
+[![Tests](https://img.shields.io/badge/tests-91%20pytest%20%2B%206%20JUnit-green)]()
 [![Coverage](https://img.shields.io/badge/coverage-6%20modules-blue)]()
 [![Python](https://img.shields.io/badge/python-3.12+-blue)]()
 [![Java](https://img.shields.io/badge/java-21+-orange)]()
@@ -118,9 +118,29 @@ cd python-agent
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
+启动 Python 服务后可以打开 Demo 控制台：
+
+```text
+http://localhost:8000/demo
+```
+
+控制台会调用真实 `/tasks` 接口创建 Agent 任务；如果 Python 服务启动时 `.env` 已配置 `OPENAI_API_KEY`、`LLM_BASE_URL` 和 `LLM_MODEL`，页面运行决策时会走真实大模型链路。
+
 ### 5. 运行测试
 
 ```bash
+# 离线金标冒烟，不依赖 Java / Redis / Elasticsearch / 真实模型
+python scripts/smoke_demo.py
+
+# 生成静态 Demo 报告，打开 docs/demo-report.html 即可展示
+python scripts/smoke_demo.py --html
+
+# 启动 Java/Python 服务后，验证真实接口和 SQL 种子数据
+python scripts/service_smoke.py
+
+# 使用真实 OpenAI-compatible 大模型验证 Agent 链路和兜底
+python scripts/real_llm_agent_smoke.py
+
 # Python 测试
 cd python-agent
 pytest app/tests/ -v
@@ -130,6 +150,10 @@ python -m app.tests.retrieval_eval
 
 # 安全测试
 pytest app/tests/test_security.py -v
+
+# Java 领域规则测试
+cd ../java-service
+mvn test
 ```
 
 ---
@@ -179,7 +203,12 @@ Total Tests:    160
 - 160 条测试用例
 - 6 类退款场景全覆盖
 - 13 个安全测试用例
-- 85 个单元/集成测试
+- 91 个 Python 单元/集成测试
+- 6 个 Java 领域规则单元测试
+- 6 条离线金标冒烟用例，覆盖推荐退款、拒绝、人工审批、补充信息和非退款咨询
+- `docs/demo-report.html` 静态报告页可直接展示冒烟结果、决策分布、规则引用和风险提示
+- `scripts/service_smoke.py` 用于服务启动后的真实接口冒烟，覆盖 Java 健康检查、订单/学习进度/课程状态和退款资格接口
+- `scripts/real_llm_agent_smoke.py` 用真实大模型验证 Agent 分类、推荐链路，以及缺字段/非退款请求兜底
 
 ### 安全测试
 
@@ -301,7 +330,9 @@ refund-decision-agent/
 - [x] 阶段 3：RAG 与证据
 - [x] 阶段 4：Redis Streams 与持久执行
 - [x] 阶段 5：评测、成本和安全
-- [ ] 阶段 6：展示与简历证据
+- [x] 阶段 6：展示与简历证据
+
+当前收尾重点：真实 LLM 中转站连通验证。项目已从 DeepSeek V4 Flash 测试切换到 Freemodel/OpenAI-compatible API 配置，详见 `PROJECT_STATUS.md`。
 
 ---
 
