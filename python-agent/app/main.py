@@ -60,10 +60,16 @@ def _init_ports():
     # 初始化 Retrieval Port
     retrieval_port = None
     try:
-        from app.infrastructure.retrieval import ElasticsearchRetriever
+        if settings.ELASTICSEARCH_URL.lower() == "fake":
+            from app.infrastructure.retrieval import FakeRetriever
 
-        retrieval_port = ElasticsearchRetriever()
-        logger.info("Retrieval Port: Elasticsearch 检索器已初始化")
+            retrieval_port = FakeRetriever()
+            logger.info("Retrieval Port: 使用内置 Demo 规则检索器")
+        else:
+            from app.infrastructure.retrieval import ElasticsearchRetriever
+
+            retrieval_port = ElasticsearchRetriever()
+            logger.info("Retrieval Port: Elasticsearch 检索器已初始化")
     except Exception as e:
         logger.warning(f"Elasticsearch 检索器初始化失败: {e}")
 

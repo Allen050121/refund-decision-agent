@@ -29,6 +29,10 @@ _tasks_store: Dict[str, Task] = {}
 _results_store: Dict[str, Dict[str, Any]] = {}
 
 
+def _enum_value(value: Any) -> Any:
+    return getattr(value, "value", value)
+
+
 # ============================================================
 # 请求/响应模型
 # ============================================================
@@ -178,7 +182,7 @@ async def _execute_task(task: Task) -> None:
         from app.agent.graph import graph
 
         compiled_graph = graph.compile()
-        final_state = await compiled_graph.ainvoke(state)
+        final_state = await compiled_graph.ainvoke(state.model_dump())
 
         # ainvoke 返回 dict，需要用 dict 访问方式
         decision = final_state.get("decision")
@@ -186,8 +190,8 @@ async def _execute_task(task: Task) -> None:
 
         # 保存结果
         result = {
-            "decision": decision.value if decision else None,
-            "reason_code": reason_code.value if reason_code else None,
+            "decision": _enum_value(decision) if decision else None,
+            "reason_code": _enum_value(reason_code) if reason_code else None,
             "risk_hints": final_state.get("risk_hints", []),
             "rule_citations": final_state.get("rule_citations", []),
             "evidence": final_state.get("evidence", []),

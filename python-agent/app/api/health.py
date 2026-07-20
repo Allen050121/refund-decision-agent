@@ -61,6 +61,9 @@ async def _check_elasticsearch() -> dict:
         import httpx
         from app.config import settings
 
+        if settings.ELASTICSEARCH_URL.lower() == "fake":
+            return {"status": "ok", "mode": "demo-fake"}
+
         async with httpx.AsyncClient(timeout=3.0) as client:
             response = await client.get(f"{settings.ELASTICSEARCH_URL}/_cluster/health")
             if response.status_code == 200:

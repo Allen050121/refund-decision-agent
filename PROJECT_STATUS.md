@@ -1,12 +1,12 @@
 # 售后退款决策 Agent - 项目状态跟踪
 
-> 最后更新：2026-06-29
+> 最后更新：2026-07-20
 
 ## 当前阶段
 
-项目已进入 **MVP 收尾与真实模型连通验证** 阶段。
+项目已进入 **MVP 部署演示可用** 阶段。
 
-核心功能、评测材料、展示文档和 AI Team 任务卡均已完成；当前重点不是继续扩功能，而是修复状态记录、验证 conda 测试环境、确认 Freemodel 中转站模型调用能连通。
+核心功能、评测材料、公开文档、Demo 控制台和服务器部署均已完成；当前重点是保持演示环境稳定、避免真实密钥入库，并在需要时补充域名和 HTTPS。
 
 ---
 
@@ -20,7 +20,7 @@
 | 阶段 3：RAG 与证据 | ✅ 完成 | 已实现 Elasticsearch BM25、规则数据、召回率评测 |
 | 阶段 4：Redis Streams 与持久执行 | ✅ 完成 | 已实现消费组、心跳、XPENDING/XAUTOCLAIM 恢复 |
 | 阶段 5：评测、成本和安全 | ✅ 完成 | 已扩展到 160 条测试查询，安全测试文档已生成 |
-| 阶段 6：展示与简历证据 | ✅ 完成 | README、架构文档、评测报告、简历草稿、Docker Compose 已生成 |
+| 阶段 6：项目文档与 Demo 展示 | ✅ 完成 | README、架构文档、评测报告、Demo 控制台、Docker Compose 已生成 |
 | 当前收尾：真实 LLM 连通 | ✅ 已切到可用 OpenAI-compatible 网关 | `https://sui-xiang.com/v1` + `gpt-5.4-mini` 已通过项目 LLM client 最小推理验证 |
 | 当前收尾：工程质量与 AI Team 状态 | ✅ 完成 | Maven 重复依赖告警已清理，Python pytest 弃用警告已清零，项目记忆与 repo map 已补齐 |
 | 当前收尾：测试数据与冒烟验证 | ✅ 完成 | 已新增 6 条离线金标冒烟用例、Java 领域规则单测，并补齐缺失字段/非退款请求的最终决策断言 |
@@ -28,6 +28,7 @@
 | 当前收尾：启动后服务级冒烟 | ✅ 完成 | `scripts/service_smoke.py` 可在 Java/Python 启动后验证健康检查、SQL 种子查询和退款资格接口 |
 | 当前收尾：真实大模型 Agent 链路 | ✅ 完成 | `scripts/real_llm_agent_smoke.py` 已用 `gpt-5.4-mini @ https://sui-xiang.com/v1` 验证分类、推荐和兜底链路 |
 | 当前收尾：最小前端 Demo 控制台 | ✅ 完成 | Python 服务重启后访问 `http://localhost:8000/demo`，可选择工单并调用真实 `/tasks` Agent 链路 |
+| 当前收尾：服务器部署 | ✅ 完成 | `http://175.178.6.214/demo`、`/health`、`/health/ready` 已可访问，Java jar + Python conda + Nginx 反代运行，Python 服务端口为 8001 |
 
 ---
 
@@ -36,7 +37,7 @@
 - AI Team 任务状态：`.ai-team/state/tasks.json` 中 `TASK-000` 到 `TASK-006` 均为 `completed`，新增 `task-007-engineering-polish` 和 `task-008-test-smoke-readiness` 跟踪工程质量与测试冒烟收口。
 - 测试数据：`python-agent/data/test_queries.json` 当前为 160 条。
 - 规则数据：`python-agent/data/refund_rules.json` 当前为 10 条。
-- 展示材料：`README.md`、`docs/architecture.md`、`docs/evaluation_report.md`、`docs/resume_draft.md` 已存在。
+- 展示材料：`README.md`、`docs/architecture.md`、`docs/evaluation_report.md`、`docs/demo-report.html` 已存在。
 - 本地 `.env` 已切到可用 OpenAI-compatible 中转站：`LLM_BASE_URL=https://sui-xiang.com/v1`、`LLM_MODEL=gpt-5.4-mini`，真实 API Key 只保存在 `python-agent/.env`，不得提交。
 
 ---
@@ -70,7 +71,7 @@ POST /api/refund/check-eligibility
 
 ### 工程质量与 AI Team 状态收口
 
-已完成本轮简历展示前的工程质量清理：
+已完成本轮工程质量清理：
 
 - 删除 Java `pom.xml` 中重复的 `spring-boot-starter-data-redis` 依赖，`mvn test` 不再输出重复依赖 warning。
 - 将 Python 项目内 `datetime.utcnow()` 替换为 timezone-aware UTC 时间，清理 Pydantic/Python 3.13 相关弃用警告。
@@ -80,7 +81,7 @@ POST /api/refund/check-eligibility
 
 ### 测试数据与离线冒烟验证
 
-- 新增 `python-agent/data/demo_cases.json`，提供 6 条面试演示用金标用例：推荐退款、拒绝退款、人工审批、缺失信息和非退款咨询。
+- 新增 `python-agent/data/demo_cases.json`，提供 6 条 Demo 金标用例：推荐退款、拒绝退款、人工审批、缺失信息和非退款咨询。
 - 新增 `scripts/smoke_demo.py`，使用 Fake LLM、Fake Retriever 和用例内业务快照离线执行 Agent 核心节点，不依赖 Java、Redis、Elasticsearch 或真实模型网关。
 - 收紧 Agent 风险闸口：缺失必要字段或非退款意图时，最终决策必须收敛为 `NEED_MORE_INFORMATION`，避免冒烟测试“表面 PASS 但实际给退款建议”。
 - 新增 Java 领域规则单元测试，覆盖课程不可用、无理由退款、进度超限、越权订单、未支付订单和异常退款用户审批。
@@ -89,7 +90,7 @@ POST /api/refund/check-eligibility
 
 - `scripts/smoke_demo.py` 支持 `--json` 和 `--html`，可在同一次离线冒烟运行后输出机器可读报告或静态 HTML。
 - `docs/demo-report.html` 已生成，可直接打开，展示 6 条用例的意图、原因、决策、规则引用、风险提示和证据。
-- 该展示入口不引入前端工程依赖，不需要启动服务，适合先用于简历项目演示和面试讲解。
+- 该展示入口不引入前端工程依赖，不需要启动服务，适合用于离线结果展示和回归对比。
 
 ### 启动后服务级冒烟
 
@@ -131,14 +132,16 @@ POST /api/refund/check-eligibility
 | Sui-xiang `/models` | ✅ 通过 | `https://sui-xiang.com/v1/models` 返回 200，包含多个 GPT 模型 |
 | Sui-xiang 推理调用 | ✅ 通过 | `gpt-5.4-mini` 和 `gpt-5.4` 可用；项目当前使用 `gpt-5.4-mini` |
 | Java SQL 种子查询接口 | ✅ 通过 | 订单、学习进度、课程状态接口已用 SQL 种子数据验证 |
-| Java 退款资格接口 | ✅ 代码验证通过 | 当前代码临时 8081 验证通过；8080 旧进程重启后生效 |
+| Java 退款资格接口 | ✅ 通过 | 本地代码验证通过，服务器 8080 已随 `refund-java` 服务生效 |
+| 服务器服务级冒烟 | ✅ 通过 | 服务器运行 `scripts/service_smoke.py`，7 项检查全部通过 |
+| 服务器真实 `/tasks` 链路 | ✅ 通过 | 已返回 `COMPLETED / REFUND_RECOMMENDED`，规则引用包含 `REFUND-2026-001` |
 
 ---
 
 ## 下一步建议
 
-1. 重启 Java 服务，使 `POST /api/refund/check-eligibility` 在 8080 生效。
-2. 当前 Python Agent 已可通过本地 `.env` 调用 `gpt-5.4-mini`；启动后可直接做端到端 Agent 测试。
+1. 绑定正式域名，并用 HTTPS 证书替换当前 HTTP 访问。
+2. Elasticsearch 镜像拉取稳定后，将服务器 `ELASTICSEARCH_URL=fake` 切回真实 ES，并重新导入 `python-agent/data/refund_rules.json`。
 3. Freemodel 推理接口后续可再重试；当前 key 鉴权没问题，但后端返回 503。
 4. 当前数据库里的中文课程名/故障原因返回存在乱码，SQL 文件和表结构是 `utf8mb4`，更像是既有数据导入时客户端编码不对；需要时用 UTF-8 客户端重导种子数据。
 

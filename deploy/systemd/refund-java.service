@@ -1,0 +1,16 @@
+[Unit]
+Description=Refund Decision Agent Java service
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/refund-decision-agent/app/java-service
+EnvironmentFile=/opt/refund-decision-agent/env/refund-java.env
+ExecStart=/usr/bin/java -jar /opt/refund-decision-agent/app/java-service/target/java-service-0.0.1-SNAPSHOT.jar
+Restart=always
+RestartSec=5
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

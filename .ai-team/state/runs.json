@@ -1,6 +1,6 @@
 ﻿{
     "version":  1,
-    "updatedAt":  "2026-06-29T17:17:33.7311035+08:00",
+    "updatedAt":  "2026-07-20T17:23:10.3315383+08:00",
     "runs":  [
                  {
                      "run_id":  "TASK-006-reviewer-20260628174322",
@@ -308,6 +308,69 @@
                      "blocked_reason":  "",
                      "followups":  [
                                        "none"
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-014-server-deployment-executor-20260720162042",
+                     "task_id":  "task-014-server-deployment",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-07-20T16:20:42.4532439+08:00",
+                     "finished_at":  "2026-07-20T16:20:42.4532439+08:00",
+                     "changed_files":  [
+                                           "docker-compose.yml,.env.production.example,deploy/nginx/default.conf,deploy/env/refund-java.env.example,deploy/env/refund-python.env.example,deploy/systemd/refund-java.service,deploy/systemd/refund-python.service,docs/DEPLOYMENT.md"
+                                       ],
+                     "verification":  [
+                                          "java-service: mvn test =\u003e BUILD SUCCESS, 6 tests,python-agent: compileall app =\u003e passed,scripts/smoke_demo.py =\u003e 6 demo cases passed,python-agent pytest app/tests =\u003e 79 passed, 5 failed, 8 errors because local Redis/Elasticsearch 192.168.85.66 were unreachable"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Need server SSH host/user, domain, and real LLM env values to perform production-facing deployment"
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-014-server-deployment-executor-20260720171306",
+                     "task_id":  "task-014-server-deployment",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-07-20T17:13:07.0235295+08:00",
+                     "finished_at":  "2026-07-20T17:13:07.0235295+08:00",
+                     "changed_files":  [
+                                           "docker-compose.yml,.env.production.example,deploy/nginx/default.conf,deploy/env/refund-java.env.example,deploy/env/refund-python.env.example,deploy/systemd/refund-java.service,deploy/systemd/refund-python.service,docs/DEPLOYMENT.md,python-agent/app/api/tasks.py,python-agent/app/main.py,python-agent/app/api/health.py"
+                                       ],
+                     "verification":  [
+                                          "server ssh ubuntu@175.178.6.214 connected with provided pem,removed old sub2api containers and /opt/sub2api per user request,installed Java 21, Maven, Nginx; reused /home/ubuntu/miniconda3,MySQL and Redis Docker containers healthy,refund-java, refund-python, nginx systemd services active,service_smoke.py =\u003e all 7 checks passed,public http://175.178.6.214/health/ready =\u003e ready,real /tasks smoke =\u003e COMPLETED REFUND_RECOMMENDED with REFUND-2026-001 citation"
+                                      ],
+                     "human_decisions":  [
+                                             "Use Python conda env on server and Java jar deployment,Delete sub2api project from server"
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+                                       "Optional: bind user\u0027s domain and add HTTPS certificate,Optional: replace demo-fake retrieval with real Elasticsearch when image pull is available"
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-015-doc-cleanup-release-executor-20260720172310",
+                     "task_id":  "task-015-doc-cleanup-release",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-07-20T17:23:10.3315383+08:00",
+                     "finished_at":  "2026-07-20T17:23:10.3315383+08:00",
+                     "changed_files":  [
+                                           "README.md,PROJECT_STATUS.md,01-售后决策Agent-MVP产品与开发文档.md,docs/DEPLOYMENT.md,docs/resume_draft.md,docker-compose.yml,.env.production.example,deploy/nginx/default.conf,deploy/env/refund-java.env.example,deploy/env/refund-python.env.example,deploy/systemd/refund-java.service,deploy/systemd/refund-python.service,python-agent/app/api/health.py,python-agent/app/api/tasks.py,python-agent/app/main.py,D:\\yangjw\\note\\mianshi-note\\量子泛娱\\简历\\项目\\06-售后退款决策Agent-部署与现场演示.md,D:\\yangjw\\note\\mianshi-note\\量子泛娱\\简历\\项目\\07-售后退款决策Agent-简历草稿.md"
+                                       ],
+                     "verification":  [
+                                          "public http://175.178.6.214/health/ready 200 ready; public /demo returned HTML; server refund-python active on 8001; server service_smoke.py 7 passed; local py_compile passed; smoke_demo 6 passed; pytest test_tasks_api 8 passed; java mvn test 6 passed"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+
                                    ]
                  }
              ]

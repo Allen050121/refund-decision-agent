@@ -1,8 +1,8 @@
 # 售后决策 Agent MVP 产品与开发文档
 
-> 文档定位：用于指导个人项目从 0 到 1 开发、测试、复盘和面试准备。  
+> 文档定位：用于指导项目从 0 到 1 开发、测试、复盘和演示交付。
 > 核心原则：范围小、业务闭环完整、结果可验证、异常可恢复、决策有证据。  
-> MVP 模式：面向秋招作品的可运行 MVP，不按真实大型客服平台规模建设。
+> MVP 模式：演示级可运行 MVP，不按真实大型客服平台规模建设。
 
 ## 1. 项目定位
 
@@ -10,7 +10,7 @@
 
 **面向在线教育场景的售后退款决策 Agent**
 
-简历可用名称：
+项目展示名称：
 
 > 售后退款决策 Agent｜RAG + Tool Calling + Human-in-the-loop
 
@@ -835,7 +835,7 @@ RAG 指标与 Agent/业务指标必须分层报告：
 
 ### 9.4 真实数据要求
 
-简历数字必须来自固定版本测试集，并保存：
+公开指标必须来自固定版本测试集，并保存：
 
 - 测试集版本。
 - Git Commit。
@@ -970,7 +970,7 @@ trace_id -> task_id -> message_id -> model_call_id -> tool_call_id
 - 可以一条命令执行完整评测。
 - 报告能定位失败发生在哪个节点。
 
-### 阶段 6：展示与简历证据
+### 阶段 6：项目文档与 Demo 展示
 
 交付物：
 
@@ -979,8 +979,7 @@ trace_id -> task_id -> message_id -> model_call_id -> tool_call_id
 - OpenAPI。
 - 评测报告。
 - 故障恢复演示。
-- 3-5 分钟演示视频。
-- 简历四条项目描述草稿。
+- Demo 控制台或静态演示报告。
 
 ## 12. MVP 验收标准
 
@@ -1007,22 +1006,7 @@ trace_id -> task_id -> message_id -> model_call_id -> tool_call_id
 - 有原始运行记录和汇总指标。
 - 至少完成一次模型或检索方案对照实验。
 
-## 13. 重点面试问题
-
-- 为什么使用 Agent，而不是固定工作流？
-- 为什么退款资格不能由模型判断？
-- 为什么 RAG 只负责规则证据？
-- Redis Streams 消息何时 ACK？
-- Python Worker 宕机后如何恢复？
-- 如何避免重复退款？
-- 规则版本冲突怎么处理？
-- SSE 断线后如何续传？
-- 模型路由带来了多少成本收益？
-- 如何证明 Agent 的决策正确？
-- 如何防止用户查询他人订单？
-- 项目中最复杂的一次失败是什么？
-
-## 14. 后续优化方向
+## 13. 后续优化方向
 
 只有 MVP 数据暴露问题后再增加：
 
@@ -1035,7 +1019,7 @@ trace_id -> task_id -> message_id -> model_call_id -> tool_call_id
 - 使用 OpenTelemetry GenAI 语义规范统一 Trace。
 - 将只读业务工具按需暴露为 MCP Server，但不是首期目标。
 
-## 15. 参考资料
+## 14. 参考资料
 
 - [LangGraph Overview](https://docs.langchain.com/oss/python/langgraph/overview)
 - [LangGraph Persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
