@@ -37,7 +37,7 @@ services:
       retries: 10
 
   elasticsearch:
-    image: elasticsearch:8.11.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     container_name: refund-elasticsearch
     restart: unless-stopped
     environment:
@@ -45,7 +45,7 @@ services:
       xpack.security.enabled: "false"
       ES_JAVA_OPTS: ${ES_JAVA_OPTS:--Xms512m -Xmx512m}
     ports:
-      - "127.0.0.1:9200:9200"
+      - "127.0.0.1:9201:9200"
     volumes:
       - es-data:/usr/share/elasticsearch/data
     healthcheck:

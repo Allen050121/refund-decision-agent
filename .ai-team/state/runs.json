@@ -1,6 +1,6 @@
 ﻿{
     "version":  1,
-    "updatedAt":  "2026-07-20T17:23:10.3315383+08:00",
+    "updatedAt":  "2026-07-21T09:20:59.4428867+08:00",
     "runs":  [
                  {
                      "run_id":  "TASK-006-reviewer-20260628174322",
@@ -364,6 +364,27 @@
                                        ],
                      "verification":  [
                                           "public http://175.178.6.214/health/ready 200 ready; public /demo returned HTML; server refund-python active on 8001; server service_smoke.py 7 passed; local py_compile passed; smoke_demo 6 passed; pytest test_tasks_api 8 passed; java mvn test 6 passed"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-016-enable-elasticsearch-executor-20260721092059",
+                     "task_id":  "task-016-enable-elasticsearch",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-07-21T09:20:59.4428867+08:00",
+                     "finished_at":  "2026-07-21T09:20:59.4428867+08:00",
+                     "changed_files":  [
+
+                                       ],
+                     "verification":  [
+                                          "server refund-elasticsearch active on 127.0.0.1:9201; imported 10 refund-rules docs; public /health/ready reports elasticsearch cluster_status yellow; server service_smoke.py 7 passed; ES retrieval returned REFUND-2026-001 for COURSE_UNAVAILABLE"
                                       ],
                      "human_decisions":  [
 

@@ -135,13 +135,14 @@ POST /api/refund/check-eligibility
 | Java 退款资格接口 | ✅ 通过 | 本地代码验证通过，服务器 8080 已随 `refund-java` 服务生效 |
 | 服务器服务级冒烟 | ✅ 通过 | 服务器运行 `scripts/service_smoke.py`，7 项检查全部通过 |
 | 服务器真实 `/tasks` 链路 | ✅ 通过 | 已返回 `COMPLETED / REFUND_RECOMMENDED`，规则引用包含 `REFUND-2026-001` |
+| 服务器 Elasticsearch | ✅ 通过 | `refund-elasticsearch` 已运行，宿主机使用 `127.0.0.1:9201`，`refund-rules` 已导入 10 条规则 |
 
 ---
 
 ## 下一步建议
 
 1. 绑定正式域名，并用 HTTPS 证书替换当前 HTTP 访问。
-2. Elasticsearch 镜像拉取稳定后，将服务器 `ELASTICSEARCH_URL=fake` 切回真实 ES，并重新导入 `python-agent/data/refund_rules.json`。
+2. 如果重建 Elasticsearch 容器，需要重新导入 `python-agent/data/refund_rules.json`。
 3. Freemodel 推理接口后续可再重试；当前 key 鉴权没问题，但后端返回 503。
 4. 当前数据库里的中文课程名/故障原因返回存在乱码，SQL 文件和表结构是 `utf8mb4`，更像是既有数据导入时客户端编码不对；需要时用 UTF-8 客户端重导种子数据。
 
