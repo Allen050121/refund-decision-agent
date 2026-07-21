@@ -1,6 +1,6 @@
 ﻿{
     "version":  1,
-    "updatedAt":  "2026-07-21T09:20:59.4428867+08:00",
+    "updatedAt":  "2026-07-21T09:27:17.2244454+08:00",
     "runs":  [
                  {
                      "run_id":  "TASK-006-reviewer-20260628174322",
@@ -385,6 +385,27 @@
                                        ],
                      "verification":  [
                                           "server refund-elasticsearch active on 127.0.0.1:9201; imported 10 refund-rules docs; public /health/ready reports elasticsearch cluster_status yellow; server service_smoke.py 7 passed; ES retrieval returned REFUND-2026-001 for COURSE_UNAVAILABLE"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-017-fix-demo-ip-route-executor-20260721092717",
+                     "task_id":  "task-017-fix-demo-ip-route",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-07-21T09:27:17.2244454+08:00",
+                     "finished_at":  "2026-07-21T09:27:17.2244454+08:00",
+                     "changed_files":  [
+
+                                       ],
+                     "verification":  [
+                                          "nginx refund-agent.conf set listen 80 default_server; public http://175.178.6.214/demo returns HTML title; public /health/ready returns ready with Elasticsearch cluster_status yellow"
                                       ],
                      "human_decisions":  [
 
