@@ -296,7 +296,7 @@ refund-decision-agent/
 - [x] 阶段 5：评测、成本和安全
 - [x] 阶段 6：项目文档、评测报告与 Demo 展示
 
-当前收尾重点：保持服务器 Demo 稳定运行，并在需要时补充域名和 HTTPS，详见 `PROJECT_STATUS.md`。
+当前收尾重点：保持服务器 Demo 稳定运行，并在 DNS 生效后补充 HTTPS，详见 `PROJECT_STATUS.md`。
 
 ---
 

@@ -4,7 +4,7 @@ Target runtime for the project demo:
 
 - Java service runs as a jar on port `8080`.
 - Python Agent runs in a conda env on port `8001`.
-- Nginx exposes `http://your-domain/demo`.
+- Nginx exposes `http://refund.yangjw.cloud/demo` after DNS points to the server.
 - MySQL, Redis, and Elasticsearch can run locally with Docker Compose.
 
 ## Server Layout
@@ -88,6 +88,12 @@ Open:
 
 ```text
 http://your-domain/demo
+```
+
+For the current demo server, use:
+
+```text
+http://refund.yangjw.cloud/demo
 ```
 
 ## Verify

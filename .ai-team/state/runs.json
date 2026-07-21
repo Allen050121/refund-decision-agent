@@ -1,6 +1,6 @@
 ﻿{
     "version":  1,
-    "updatedAt":  "2026-07-21T09:27:17.2244454+08:00",
+    "updatedAt":  "2026-07-21T09:37:59.3579713+08:00",
     "runs":  [
                  {
                      "run_id":  "TASK-006-reviewer-20260628174322",
@@ -406,6 +406,27 @@
                                        ],
                      "verification":  [
                                           "nginx refund-agent.conf set listen 80 default_server; public http://175.178.6.214/demo returns HTML title; public /health/ready returns ready with Elasticsearch cluster_status yellow"
+                                      ],
+                     "human_decisions":  [
+
+                                         ],
+                     "blocked_reason":  "",
+                     "followups":  [
+
+                                   ]
+                 },
+                 {
+                     "run_id":  "task-018-refund-domain-executor-20260721093759",
+                     "task_id":  "task-018-refund-domain",
+                     "role":  "executor",
+                     "status":  "passed",
+                     "started_at":  "2026-07-21T09:37:59.3579713+08:00",
+                     "finished_at":  "2026-07-21T09:37:59.3579713+08:00",
+                     "changed_files":  [
+
+                                       ],
+                     "verification":  [
+                                          "nginx server_name refund.yangjw.cloud configured; nginx -t passed and reloaded; Host header and curl --resolve refund.yangjw.cloud:80:175.178.6.214 /demo returned HTML; /health/ready returned ready with Elasticsearch cluster_status yellow; DNS record for refund.yangjw.cloud not yet published"
                                       ],
                      "human_decisions":  [
 

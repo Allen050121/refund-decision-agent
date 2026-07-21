@@ -28,7 +28,7 @@
 | 当前收尾：启动后服务级冒烟 | ✅ 完成 | `scripts/service_smoke.py` 可在 Java/Python 启动后验证健康检查、SQL 种子查询和退款资格接口 |
 | 当前收尾：真实大模型 Agent 链路 | ✅ 完成 | `scripts/real_llm_agent_smoke.py` 已用 `gpt-5.4-mini @ https://sui-xiang.com/v1` 验证分类、推荐和兜底链路 |
 | 当前收尾：最小前端 Demo 控制台 | ✅ 完成 | Python 服务重启后访问 `http://localhost:8000/demo`，可选择工单并调用真实 `/tasks` Agent 链路 |
-| 当前收尾：服务器部署 | ✅ 完成 | `http://175.178.6.214/demo`、`/health`、`/health/ready` 已可访问，Java jar + Python conda + Nginx 反代运行，Python 服务端口为 8001 |
+| 当前收尾：服务器部署 | ✅ 完成 | `http://175.178.6.214/demo` 已可访问；Nginx 已预配 `refund.yangjw.cloud`，等待 DNS 解析到服务器后可直接用域名访问 |
 
 ---
 
